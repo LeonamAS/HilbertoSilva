@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HilbertoSilva.Models;
 
-public class TurmaDisciplina
+public class DiarioClasse
 {
     [Key]
     [Column("turma_disciplina_id")]

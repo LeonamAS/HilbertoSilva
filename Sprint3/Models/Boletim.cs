@@ -21,7 +21,7 @@ public class Boletim
     public int FkTurmaDisciplina { get; set; }
 
     [ForeignKey(nameof(FkTurmaDisciplina))]
-    public TurmaDisciplina TurmaDisciplina { get; set; }
+    public DiarioClasse DiarioClasse { get; set; }
 
     [Column("nota_u1")]
     public decimal NotaU1 { get; set; } = 0.0m;

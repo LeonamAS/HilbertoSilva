@@ -14,7 +14,7 @@ public class EscolaDbContext : DbContext
     public DbSet<Aluno> Alunos { get; set; }
     public DbSet<Professor> Professores { get; set; }
     public DbSet<Disciplina> Disciplinas { get; set; }
-    public DbSet<TurmaDisciplina> TurmasDisciplinas { get; set; }
+    public DbSet<DiarioClasse> DiarioClasse { get; set; }
     public DbSet<Boletim> Boletins { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

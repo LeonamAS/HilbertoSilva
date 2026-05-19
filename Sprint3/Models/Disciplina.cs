@@ -19,5 +19,5 @@ public class Disciplina
     public int CargaHoraria { get; set; }
 
     // Propriedade de Navegação
-    public ICollection<TurmaDisciplina> TurmasDisciplinas { get; set; } = new List<TurmaDisciplina>();
+    public ICollection<DiarioClasse> DiariosClasses { get; set; } = new List<DiarioClasse>();
 }
