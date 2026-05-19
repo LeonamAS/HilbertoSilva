@@ -22,6 +22,13 @@ public class EscolaDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // ==========================================
+        // Conversão do Enum TipoUsuario para String
+        // ==========================================
+        modelBuilder.Entity<Usuario>()
+            .Property(u => u.TipoUsuario)
+            .HasConversion<string>();
+
+        // ==========================================
         // 1. Configuração de Índices Únicos
         // ==========================================
         modelBuilder.Entity<Usuario>()

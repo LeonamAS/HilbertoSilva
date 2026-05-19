@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HilbertoSilva.Models.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HilbertoSilva.Models;
@@ -22,7 +23,7 @@ public class Usuario
 
     [Required(ErrorMessage = "O tipo de usuário é obrigatório.")]
     [Column("tipo_usuario")]
-    public string TipoUsuario { get; set; }
+    public TipoUsuario TipoUsuario { get; set; }
 
     [Column("data_cadastro")]
     public DateTime DataCadastro { get; set; } = DateTime.Now;
