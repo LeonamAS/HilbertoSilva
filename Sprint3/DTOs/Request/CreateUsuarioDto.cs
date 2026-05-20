@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using HilbertoSilva.Models.Enum;
 
 namespace HilbertoSilva.DTOs.Request;
 
 public class CreateUsuarioDto
 {
-    [Required(ErrorMessage = "O CPF é obrigatório.")]
-    [StringLength(11, MinimumLength = 11, ErrorMessage = "O CPF deve conter exatamente 11 números.")]
-    [RegularExpression(@"^[0-9]*$", ErrorMessage = "O CPF deve conter apenas números.")]
+    [Required(ErrorMessage = "O CPF ou Usuário é obrigatório.")]
+    [StringLength(20, ErrorMessage = "O identificador não pode ultrapassar 20 caracteres.")]
     public string Cpf { get; set; }
 
     [Required(ErrorMessage = "A senha é obrigatória.")]
@@ -14,5 +15,6 @@ public class CreateUsuarioDto
     public string Senha { get; set; }
 
     [Required(ErrorMessage = "O tipo de usuário é obrigatório.")]
-    public string TipoUsuario { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TipoUsuario TipoUsuario { get; set; }
 }

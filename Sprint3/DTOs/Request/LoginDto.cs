@@ -4,7 +4,7 @@ namespace HilbertoSilva.DTOs.Request;
 
 public class LoginDto
 {
-    [Required(ErrorMessage = "O CPF é obrigatório.")]
+    [Required(ErrorMessage = "O campo de login (CPF ou Usuário) é obrigatório.")]
     public string Cpf { get; set; }
 
     [Required(ErrorMessage = "A senha é obrigatória.")]

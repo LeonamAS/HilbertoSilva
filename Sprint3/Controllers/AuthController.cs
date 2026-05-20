@@ -1,5 +1,5 @@
 ﻿using HilbertoSilva.DTOs.Request;
-using HilbertoSilva.Services;
+using HilbertoSilva.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,10 +11,12 @@ namespace HilbertoSilva.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ITokenService _tokenService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ITokenService tokenService)
     {
         _authService = authService;
+        _tokenService = tokenService;
     }
 
     [HttpPost("login")]
@@ -23,34 +25,34 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var token = await _authService.LoginAsync(loginDto);
+        var usuario = await _authService.ValidarCredenciaisAsync(loginDto);
 
-        if (string.IsNullOrEmpty(token))
+        if (usuario == null)
             return Unauthorized(new { mensagem = "CPF ou senha inválidos." });
+
+        var token = _tokenService.GerarToken(usuario);
 
         return Ok(new { token });
     }
 
     [HttpPost("registrar")]
-    [AllowAnonymous] // Nota: Se apenas Admins puderem criar usuários, troque por [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Registrar([FromBody] CreateUsuarioDto createUsuarioDto)
     {
         var usuarioCriado = await _authService.RegistrarAsync(createUsuarioDto);
-
-        // Retornando 201 Created. Em um cenário real, aponte para um GetById de usuários.
         return StatusCode(StatusCodes.Status201Created, usuarioCriado);
     }
 
     [HttpPut("alterar-senha")]
-    [Authorize] // Exige que o usuário envie um Bearer token válido
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AlterarSenha([FromBody] UsuarioAlterarSenhaDto alterarSenhaDto)
     {
-        // Extrai o ID do usuário diretamente do Token JWT (claim NameIdentifier ou a que você configurou no seu gerador de JWT)
+        // Extrai o ID do usuário diretamente do Token JWT
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!int.TryParse(userIdClaim, out int usuarioId))
