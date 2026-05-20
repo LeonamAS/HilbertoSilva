@@ -1,9 +1,8 @@
-﻿namespace HilbertoSilva.Models.Enum
+﻿namespace HilbertoSilva.Models.Enum;
+
+public enum TipoUsuario
 {
-    public enum TipoUsuario
-    {
-        ADMIN,
-        PROFESSOR,
-        ALUNO
-    }
+    ADMIN,
+    PROFESSOR,
+    ALUNO
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HilbertoSilva.Models.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace HilbertoSilva.DTOs.Request;
 
@@ -15,5 +16,5 @@ public class TurmaRequestDto
     public int AnoLetivo { get; set; }
 
     [Required(ErrorMessage = "O turno é obrigatório.")]
-    public string Turno { get; set; }
+    public TurnoTurma Turno { get; set; }
 }

@@ -47,31 +47,26 @@ namespace HilbertoSilva.Services
             };
         }
 
-        public async Task<AlunoResponseDto> CriarComUsuarioETransacaoAsync(CreateAlunoComUsuarioDto dto)
+        public async Task<AlunoResponseDto> CriarUsuarioETransacaoAsync(CreateAlunoComUsuarioDto dto)
         {
-            // 1. Inicia a transação garantindo a atomicidade (tudo ou nada)
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // 2. Instancia o Usuário com base no modelo real 'Usuario'
                 var novoUsuario = new Usuario
                 {
                     Cpf = dto.Usuario.Cpf,
-                    Senha = dto.Usuario.Senha, // Caso use hash de senha, aplique aqui (ex: BCrypt ou Identity)
+                    Senha = dto.Usuario.Senha,
                     TipoUsuario = dto.Usuario.TipoUsuario
-                    // Note que o 'DataCadastro' já inicializa sozinho com DateTime.Now no seu modelo!
                 };
 
-                // Adiciona e salva para gerar o 'usuario_id' no banco de dados
                 _context.Set<Usuario>().Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                // 3. Instancia o Aluno usando os mapeamentos exatos do seu modelo real
                 var novoAluno = new Aluno
                 {
-                    FkUsuario = novoUsuario.Id,          // <-- Usando a propriedade real 'FkUsuario'
-                    FkTurma = dto.Aluno.TurmaId,         // <-- Mapeando o int? para 'FkTurma'
+                    FkUsuario = novoUsuario.Id,
+                    FkTurma = dto.Aluno.TurmaId,
                     Nome = dto.Aluno.Nome,
                     DataNascimento = dto.Aluno.DataNascimento,
                     Matricula = dto.Aluno.Matricula,
@@ -83,10 +78,8 @@ namespace HilbertoSilva.Services
                 _context.Set<Aluno>().Add(novoAluno);
                 await _context.SaveChangesAsync();
 
-                // 4. Se o fluxo chegou aqui sem erros, confirma a operação no banco definitivamente
                 await transaction.CommitAsync();
 
-                // 5. Retorna o DTO de resposta preenchido
                 return new AlunoResponseDto
                 {
                     Id = novoAluno.Id,
@@ -100,7 +93,6 @@ namespace HilbertoSilva.Services
             }
             catch (Exception)
             {
-                // Caso ocorra qualquer erro (Ex: CPF ou Matrícula duplicada), desfaz tudo
                 await transaction.RollbackAsync();
                 throw;
             }

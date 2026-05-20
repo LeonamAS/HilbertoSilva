@@ -18,7 +18,6 @@ public class ProfessorService : IProfessorService
 
     public async Task<IEnumerable<ProfessorResponseDto>> ObterTodosAsync()
     {
-        // Busca todos os professores e projeta direto para o DTO de resposta
         return await _context.Professores
             .Select(p => new ProfessorResponseDto
             {
@@ -32,13 +31,11 @@ public class ProfessorService : IProfessorService
 
     public async Task<ProfessorResponseDto?> ObterPorIdAsync(int id)
     {
-        // Busca o registro por ID (Chave Primária)
         var professor = await _context.Professores.FindAsync(id);
 
         if (professor == null)
             return null;
 
-        // Retorna o mapeamento para o DTO
         return new ProfessorResponseDto
         {
             Id = professor.Id,
@@ -48,29 +45,48 @@ public class ProfessorService : IProfessorService
         };
     }
 
-    public async Task<ProfessorResponseDto> CriarAsync(CreateProfessorDto dto)
+    public async Task<ProfessorResponseDto> CriarUsuarioETransacaoAsync(CreateProfessorComUsuarioDto dto)
     {
-        // Instancia a entidade real do banco mapeando os dados do DTO
-        var novoProfessor = new Professor
-        {
-            //UsuarioId = dto.UsuarioId,
-            Nome = dto.Nome,
-            Telefone = dto.Telefone,
-            Especialidade = dto.Especialidade
-        };
+        await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        // Adiciona e commita as alterações no MySQL via Pomelo
-        await _context.Professores.AddAsync(novoProfessor);
-        await _context.SaveChangesAsync();
-
-        // Retorna o DTO de resposta contendo o ID auto-incrementado gerado pelo banco
-        return new ProfessorResponseDto
+        try
         {
-            Id = novoProfessor.Id,
-            Nome = novoProfessor.Nome,
-            Telefone = novoProfessor.Telefone,
-            Especialidade = novoProfessor.Especialidade
-        };
+            var novoUsuario = new Usuario
+            {
+                Cpf = dto.Usuario.Cpf,
+                Senha = dto.Usuario.Senha,
+                TipoUsuario = dto.Usuario.TipoUsuario
+            };
+
+            _context.Set<Usuario>().Add(novoUsuario);
+            await _context.SaveChangesAsync();
+
+            var novoProfessor = new Professor
+            {
+                FkUsuario = novoUsuario.Id,
+                Nome = dto.Professor.Nome,
+                Telefone = dto.Professor.Telefone,
+                Especialidade = dto.Professor.Especialidade
+            };
+
+            _context.Set<Professor>().Add(novoProfessor);
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return new ProfessorResponseDto
+            {
+                Id = novoProfessor.Id,
+                Nome = novoProfessor.Nome,
+                Telefone = novoProfessor.Telefone,
+                Especialidade = novoProfessor.Especialidade
+            };
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> AtualizarAsync(int id, UpdateProfessorDto dto)
@@ -80,7 +96,6 @@ public class ProfessorService : IProfessorService
         if (professor == null)
             return false;
 
-        // Atualiza apenas as propriedades permitidas pelo DTO de atualização
         professor.Nome = dto.Nome;
         professor.Telefone = dto.Telefone;
         professor.Especialidade = dto.Especialidade;

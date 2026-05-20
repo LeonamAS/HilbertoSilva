@@ -7,7 +7,7 @@ public interface IProfessorService
 {
     Task<IEnumerable<ProfessorResponseDto>> ObterTodosAsync();
     Task<ProfessorResponseDto?> ObterPorIdAsync(int id);
-    Task<ProfessorResponseDto> CriarAsync(CreateProfessorDto dto);
+    Task<ProfessorResponseDto> CriarUsuarioETransacaoAsync(CreateProfessorComUsuarioDto dto);
     Task<bool> AtualizarAsync(int id, UpdateProfessorDto dto);
     Task<bool> DeletarAsync(int id);
 }

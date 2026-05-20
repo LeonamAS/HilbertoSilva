@@ -18,7 +18,6 @@ public class TurmaService : ITurmaService
 
     public async Task<IEnumerable<TurmaResponseDto>> ObterTodasAsync()
     {
-        // Busca todas as turmas e projeta diretamente para o DTO de resposta
         return await _context.Turmas
             .Select(t => new TurmaResponseDto
             {
@@ -33,13 +32,11 @@ public class TurmaService : ITurmaService
 
     public async Task<TurmaResponseDto?> ObterPorIdAsync(int id)
     {
-        // Busca a turma no banco pela Chave Primária (ID)
         var turma = await _context.Turmas.FindAsync(id);
 
         if (turma == null)
             return null;
 
-        // Mapeia os dados encontrados para o DTO de resposta
         return new TurmaResponseDto
         {
             Id = turma.Id,
@@ -52,7 +49,6 @@ public class TurmaService : ITurmaService
 
     public async Task<TurmaResponseDto> CriarAsync(TurmaRequestDto dto)
     {
-        // Transforma o DTO de requisição na entidade física que o banco conhece
         var novaTurma = new Turma
         {
             NomeTurma = dto.NomeTurma,
@@ -61,11 +57,9 @@ public class TurmaService : ITurmaService
             Turno = dto.Turno
         };
 
-        // Adiciona e commita a nova linha no MySQL via Pomelo
         await _context.Turmas.AddAsync(novaTurma);
         await _context.SaveChangesAsync();
 
-        // Retorna a resposta contendo o ID auto-incrementado gerado pelo banco
         return new TurmaResponseDto
         {
             Id = novaTurma.Id,
@@ -81,9 +75,8 @@ public class TurmaService : ITurmaService
         var turma = await _context.Turmas.FindAsync(id);
 
         if (turma == null)
-            return false; // Turma não encontrada para atualizar
+            return false;
 
-        // Atualiza os campos com os dados validados que vieram da requisição
         turma.NomeTurma = dto.NomeTurma;
         turma.AnoEscolar = dto.AnoEscolar;
         turma.AnoLetivo = dto.AnoLetivo;
@@ -100,7 +93,7 @@ public class TurmaService : ITurmaService
         var turma = await _context.Turmas.FindAsync(id);
 
         if (turma == null)
-            return false; // Turma não existe no banco
+            return false;
 
         _context.Turmas.Remove(turma);
         await _context.SaveChangesAsync();

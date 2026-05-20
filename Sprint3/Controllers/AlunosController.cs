@@ -44,7 +44,7 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AlunoResponseDto>> CreateComUsuario([FromBody] CreateAlunoComUsuarioDto dto)
     {
-        var novoAluno = await _alunoService.CriarComUsuarioETransacaoAsync(dto);
+        var novoAluno = await _alunoService.CriarUsuarioETransacaoAsync(dto);
 
         return CreatedAtAction(nameof(GetAlunoPorId), new { id = novoAluno.Id }, novoAluno);
     }

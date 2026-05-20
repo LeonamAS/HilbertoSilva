@@ -39,14 +39,14 @@ public class ProfessorController : ControllerBase
         return Ok(professor);
     }
 
-    [HttpPost]
+    [HttpPost("com-usuario")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Criar([FromBody] CreateProfessorDto dto)
+    public async Task<ActionResult<ProfessorResponseDto>> CreateComUsuario([FromBody] CreateProfessorComUsuarioDto dto)
     {
-        var professorCriado = await _professorService.CriarAsync(dto);
+        var novoProfessor = await _professorService.CriarUsuarioETransacaoAsync(dto);
 
-        return CreatedAtAction(nameof(ObterPorId), new { id = professorCriado.Id }, professorCriado);
+        return CreatedAtAction(nameof(ObterPorId), new { id = novoProfessor.Id }, novoProfessor);
     }
 
     [HttpPut("{id}")]

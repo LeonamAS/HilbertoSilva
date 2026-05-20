@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HilbertoSilva.Models.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HilbertoSilva.Models;
@@ -24,7 +25,7 @@ public class Turma
 
     [Required(ErrorMessage = "O turno é obrigatório.")]
     [Column("turno")]
-    public string Turno { get; set; }
+    public TurnoTurma Turno { get; set; }
 
     // Propriedade de Navegação (Uma turma tem vários alunos)
     public ICollection<Aluno> Alunos { get; set; } = new List<Aluno>();

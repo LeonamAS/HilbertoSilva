@@ -22,10 +22,14 @@ public class EscolaDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // ==========================================
-        // Conversão do Enum TipoUsuario para String
+        // Conversão dos Enums para String
         // ==========================================
         modelBuilder.Entity<Usuario>()
             .Property(u => u.TipoUsuario)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Turma>()
+            .Property(t => t.Turno)
             .HasConversion<string>();
 
         // ==========================================

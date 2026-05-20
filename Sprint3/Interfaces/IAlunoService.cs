@@ -7,7 +7,7 @@ public interface IAlunoService
 {
     Task<IEnumerable<AlunoResponseDto>> ObterTodosAsync();
     Task<AlunoResponseDto> ObterPorIdAsync(int id);
-    Task<AlunoResponseDto> CriarComUsuarioETransacaoAsync(CreateAlunoDto dto);
+    Task<AlunoResponseDto> CriarUsuarioETransacaoAsync(CreateAlunoComUsuarioDto dto);
     Task<bool> AtualizarAsync(int id, UpdateAlunoDto dto);
     Task<bool> DeletarAsync(int id);
 }
