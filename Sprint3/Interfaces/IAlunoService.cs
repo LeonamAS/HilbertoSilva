@@ -5,9 +5,9 @@ namespace HilbertoSilva.Interfaces;
 
 public interface IAlunoService
 {
-    Task<IEnumerable<AlunoResponseDto>> ObterAlunosAsync();
-    Task<AlunoResponseDto> ObterAlunoPorIdAsync(int id);
-    Task<AlunoResponseDto> CriarAlunoAsync(CreateAlunoDto dto);
-    Task<bool> AtualizarAlunoAsync(int id, UpdateAlunoDto dto);
-    Task<bool> DeletarAlunoAsync(int id);
+    Task<IEnumerable<AlunoResponseDto>> ObterTodosAsync();
+    Task<AlunoResponseDto> ObterPorIdAsync(int id);
+    Task<AlunoResponseDto> CriarComUsuarioETransacaoAsync(CreateAlunoDto dto);
+    Task<bool> AtualizarAsync(int id, UpdateAlunoDto dto);
+    Task<bool> DeletarAsync(int id);
 }

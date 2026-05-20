@@ -4,9 +4,6 @@ namespace HilbertoSilva.DTOs.Request;
 
 public class CreateAlunoDto
 {
-    [Required(ErrorMessage = "O usuário é obrigatório.")]
-    public int UsuarioId { get; set; }
-
     public int? TurmaId { get; set; }
 
     [Required(ErrorMessage = "O nome do aluno é obrigatório.")]

@@ -83,6 +83,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
+builder.Services.AddScoped<IProfessorService, ProfessorService>();
+builder.Services.AddScoped<ITurmaService, TurmaService>();
 
 var app = builder.Build();
 
@@ -92,6 +94,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

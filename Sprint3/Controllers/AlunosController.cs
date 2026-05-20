@@ -1,12 +1,14 @@
 ﻿using HilbertoSilva.DTOs.Request;
 using HilbertoSilva.DTOs.Response;
 using HilbertoSilva.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HilbertoSilva.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "ADMIN")]
 public class AlunosController : ControllerBase
 {
     private readonly IAlunoService _alunoService;
@@ -20,7 +22,7 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<AlunoResponseDto>>> GetAlunos()
     {
-        var alunos = await _alunoService.ObterAlunosAsync();
+        var alunos = await _alunoService.ObterTodosAsync();
         return Ok(alunos);
     }
 
@@ -29,7 +31,7 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AlunoResponseDto>> GetAlunoPorId(int id)
     {
-        var aluno = await _alunoService.ObterAlunoPorIdAsync(id);
+        var aluno = await _alunoService.ObterPorIdAsync(id);
 
         if (aluno == null)
             return NotFound(new { mensagem = "Aluno não encontrado." });
@@ -37,13 +39,12 @@ public class AlunosController : ControllerBase
         return Ok(aluno);
     }
 
-    [HttpPost]
+    [HttpPost("com-usuario")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<AlunoResponseDto>> Create([FromBody] CreateAlunoDto createAlunoDto)
+    public async Task<ActionResult<AlunoResponseDto>> CreateComUsuario([FromBody] CreateAlunoComUsuarioDto dto)
     {
-        var novoAluno = await _alunoService.CriarAlunoAsync(createAlunoDto);
-
+        var novoAluno = await _alunoService.CriarComUsuarioETransacaoAsync(dto);
 
         return CreatedAtAction(nameof(GetAlunoPorId), new { id = novoAluno.Id }, novoAluno);
     }
@@ -54,7 +55,7 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateAluno(int id, [FromBody] UpdateAlunoDto updateAlunoDto)
     {
-        var atualizado = await _alunoService.AtualizarAlunoAsync(id, updateAlunoDto);
+        var atualizado = await _alunoService.AtualizarAsync(id, updateAlunoDto);
 
         if (!atualizado)
             return NotFound(new { mensagem = "Aluno não encontrado para atualização." });
@@ -67,7 +68,7 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAluno(int id)
     {
-        var deletado = await _alunoService.DeletarAlunoAsync(id);
+        var deletado = await _alunoService.DeletarAsync(id);
 
         if (!deletado)
             return NotFound(new { mensagem = "Aluno não encontrado para exclusão." });

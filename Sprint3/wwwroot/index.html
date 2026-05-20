@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth - Hilberto Silva</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #54a790;
+            --dark-text: #2E4D68;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .auth-container {
+            max-width: 900px;
+            width: 100%;
+            min-height: 550px;
+            background: #fff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.1);
+            /* Transformando o container base em Flexbox para preencher a altura corretamente */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Painel Esquerdo (Verde) */
+        .panel-left {
+            background-color: var(--primary-green);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+            .panel-left h1 {
+                font-weight: bold;
+                font-size: 2.5rem;
+            }
+
+            .panel-left p {
+                margin: 20px 0 30px;
+                font-weight: 300;
+            }
+
+        .btn-ghost {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            border-radius: 50px;
+            padding: 10px 45px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+            .btn-ghost:hover {
+                background: white;
+                color: var(--primary-green);
+            }
+
+        /* Painel Direito (Formulário) */
+        .panel-right {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .panel-right h2 {
+                color: var(--primary-green);
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+
+        .social-container {
+            margin: 20px 0;
+        }
+
+            .social-container a {
+                border: 1px solid #ddd;
+                border-radius: 50%;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0 5px;
+                height: 40px;
+                width: 40px;
+                color: #333;
+                text-decoration: none;
+            }
+
+        .input-group {
+            background-color: #eee;
+            border: none;
+            border-radius: 8px;
+            margin: 8px 0;
+            padding: 5px 15px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+            .input-group i {
+                color: #888;
+                margin-right: 10px;
+            }
+
+            .input-group input {
+                background: transparent;
+                border: none;
+                padding: 10px;
+                outline: none;
+                width: 100%;
+            }
+
+        .btn-signup {
+            background-color: var(--primary-green);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 60px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+            .btn-signup:hover {
+                background-color: #458d7a;
+                transform: scale(1.05);
+            }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="row g-0 flex-grow-1 w-100">
+            <div class="col-md-5 panel-left">
+                <h1>Escola Municipal Hilberto Silva</h1>
+                <p>Placeholder</p>
+            </div>
+
+            <div class="col-md-7 panel-right">
+                <h2 id="formTitle">Acessar Portal</h2>
+
+                <p class="text-muted small">Placeholder</p>
+
+                <form id="authForm" class="w-100 px-lg-5" novalidate>
+
+                    <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="inputCpf" placeholder="CPF (000.000.000-00)" maxlength="14">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="inputSenha" placeholder="Password">
+                    </div>
+
+                    <div id="alertBox" class="alert alert-danger d-none mt-3 p-2 small"></div>
+
+                    <div class="text-center">
+                        <button type="submit" id="btnAction" class="btn-signup">FAZER LOGIN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

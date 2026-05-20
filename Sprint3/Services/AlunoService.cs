@@ -16,7 +16,7 @@ namespace HilbertoSilva.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<AlunoResponseDto>> ObterAlunosAsync()
+        public async Task<IEnumerable<AlunoResponseDto>> ObterTodosAsync()
         {
             return await _context.Alunos
                 .Select(aluno => new AlunoResponseDto
@@ -30,7 +30,7 @@ namespace HilbertoSilva.Services
                 .ToListAsync();
         }
 
-        public async Task<AlunoResponseDto?> ObterAlunoPorIdAsync(int id)
+        public async Task<AlunoResponseDto?> ObterPorIdAsync(int id)
         {
             var aluno = await _context.Alunos.FindAsync(id);
 
@@ -47,39 +47,66 @@ namespace HilbertoSilva.Services
             };
         }
 
-        public async Task<AlunoResponseDto> CriarAlunoAsync(CreateAlunoDto dto)
+        public async Task<AlunoResponseDto> CriarComUsuarioETransacaoAsync(CreateAlunoComUsuarioDto dto)
         {
-            var novoAluno = new Aluno
-            {
-                //UsuarioId = dto.UsuarioId,
-                //TurmaId = dto.TurmaId,
-                Nome = dto.Nome,
-                DataNascimento = dto.DataNascimento,
-                Matricula = dto.Matricula,
-                NomeResponsavel = dto.NomeResponsavel,
-                CpfResponsavel = dto.CpfResponsavel,
-                TelefoneResponsavel = dto.TelefoneResponsavel
-            };
+            // 1. Inicia a transação garantindo a atomicidade (tudo ou nada)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _context.Alunos.AddAsync(novoAluno);
-            await _context.SaveChangesAsync();
-
-            return new AlunoResponseDto
+            try
             {
-                Id = novoAluno.Id,
-                Nome = novoAluno.Nome,
-                Matricula = novoAluno.Matricula,
-                DataNascimento = novoAluno.DataNascimento,
-                NomeResponsavel = novoAluno.NomeResponsavel
-                // Se o seu AlunoResponseDto tiver as propriedades abaixo, pode descomentá-las:
-                // CpfResponsavel = novoAluno.CpfResponsavel,
-                // TelefoneResponsavel = novoAluno.TelefoneResponsavel,
-                // UsuarioId = novoAluno.UsuarioId,
-                // TurmaId = novoAluno.TurmaId
-            };
+                // 2. Instancia o Usuário com base no modelo real 'Usuario'
+                var novoUsuario = new Usuario
+                {
+                    Cpf = dto.Usuario.Cpf,
+                    Senha = dto.Usuario.Senha, // Caso use hash de senha, aplique aqui (ex: BCrypt ou Identity)
+                    TipoUsuario = dto.Usuario.TipoUsuario
+                    // Note que o 'DataCadastro' já inicializa sozinho com DateTime.Now no seu modelo!
+                };
+
+                // Adiciona e salva para gerar o 'usuario_id' no banco de dados
+                _context.Set<Usuario>().Add(novoUsuario);
+                await _context.SaveChangesAsync();
+
+                // 3. Instancia o Aluno usando os mapeamentos exatos do seu modelo real
+                var novoAluno = new Aluno
+                {
+                    FkUsuario = novoUsuario.Id,          // <-- Usando a propriedade real 'FkUsuario'
+                    FkTurma = dto.Aluno.TurmaId,         // <-- Mapeando o int? para 'FkTurma'
+                    Nome = dto.Aluno.Nome,
+                    DataNascimento = dto.Aluno.DataNascimento,
+                    Matricula = dto.Aluno.Matricula,
+                    NomeResponsavel = dto.Aluno.NomeResponsavel,
+                    CpfResponsavel = dto.Aluno.CpfResponsavel,
+                    TelefoneResponsavel = dto.Aluno.TelefoneResponsavel
+                };
+
+                _context.Set<Aluno>().Add(novoAluno);
+                await _context.SaveChangesAsync();
+
+                // 4. Se o fluxo chegou aqui sem erros, confirma a operação no banco definitivamente
+                await transaction.CommitAsync();
+
+                // 5. Retorna o DTO de resposta preenchido
+                return new AlunoResponseDto
+                {
+                    Id = novoAluno.Id,
+                    Nome = novoAluno.Nome,
+                    DataNascimento = novoAluno.DataNascimento,
+                    Matricula = novoAluno.Matricula,
+                    NomeResponsavel = novoAluno.NomeResponsavel,
+                    CpfResponsavel = novoAluno.CpfResponsavel,
+                    TelefoneResponsavel = novoAluno.TelefoneResponsavel
+                };
+            }
+            catch (Exception)
+            {
+                // Caso ocorra qualquer erro (Ex: CPF ou Matrícula duplicada), desfaz tudo
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
-        public async Task<bool> AtualizarAlunoAsync(int id, UpdateAlunoDto dto)
+        public async Task<bool> AtualizarAsync(int id, UpdateAlunoDto dto)
         {
             var aluno = await _context.Alunos.FindAsync(id);
 
@@ -98,7 +125,7 @@ namespace HilbertoSilva.Services
             return true;
         }
 
-        public async Task<bool> DeletarAlunoAsync(int id)
+        public async Task<bool> DeletarAsync(int id)
         {
             var aluno = await _context.Alunos.FindAsync(id);
 
