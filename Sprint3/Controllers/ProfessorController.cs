@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HilbertoSilva.DTOs.Response;
-using HilbertoSilva.Interfaces;
+using HilbertoSilva.Services.Interfaces;
 using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Request.Update;
 
@@ -45,7 +45,7 @@ public class ProfessorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ProfessorResponseDto>> CreateComUsuario([FromBody] CreateProfessorComUsuarioDto dto)
     {
-        var novoProfessor = await _professorService.CriarUsuarioETransacaoAsync(dto);
+        var novoProfessor = await _professorService.CriarAsync(dto);
 
         return CreatedAtAction(nameof(ObterPorId), new { id = novoProfessor.Id }, novoProfessor);
     }

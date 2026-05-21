@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using HilbertoSilva.Data;
 using HilbertoSilva.DTOs.Response;
-using HilbertoSilva.Interfaces;
+using HilbertoSilva.Services.Interfaces;
 using HilbertoSilva.Models;
 using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Request.Update;
@@ -46,7 +46,7 @@ public class ProfessorService : IProfessorService
         };
     }
 
-    public async Task<ProfessorResponseDto> CriarUsuarioETransacaoAsync(CreateProfessorComUsuarioDto dto)
+    public async Task<ProfessorResponseDto> CriarAsync(CreateProfessorComUsuarioDto dto)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
 

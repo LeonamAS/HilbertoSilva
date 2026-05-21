@@ -1,5 +1,7 @@
 using HilbertoSilva.Data;
 using HilbertoSilva.Interfaces;
+using HilbertoSilva.Repositories;
+using HilbertoSilva.Repositories.Interfaces;
 using HilbertoSilva.Services;
 using HilbertoSilva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -83,10 +85,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ITurmaService, TurmaService>();
 builder.Services.AddScoped<IDisciplinaService, DisciplinaService>();
+builder.Services.AddScoped<IDiarioClasseService, DiarioClasseService>();
+builder.Services.AddScoped<IBoletimService, BoletimService>();
 
 var app = builder.Build();
 

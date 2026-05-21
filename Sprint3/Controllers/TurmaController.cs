@@ -21,7 +21,7 @@ public class TurmaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ObterTodas()
     {
-        var turmas = await _turmaService.ObterTodasAsync();
+        var turmas = await _turmaService.ObterTodosAsync();
         return Ok(turmas);
     }
 

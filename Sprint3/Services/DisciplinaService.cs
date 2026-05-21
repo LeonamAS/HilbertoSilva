@@ -1,94 +1,81 @@
-﻿using Microsoft.EntityFrameworkCore;
-using HilbertoSilva.Data;
-using HilbertoSilva.Models;
+﻿using HilbertoSilva.Models;
 using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Response;
 using HilbertoSilva.Services.Interfaces;
+using HilbertoSilva.Repositories.Interfaces;
 
-namespace HilbertoSilva.Services
+namespace HilbertoSilva.Services;
+
+public class DisciplinaService : IDisciplinaService
 {
-    public class DisciplinaService : IDisciplinaService
+    private readonly IBaseRepository<Disciplina> _repositorio;
+
+    public DisciplinaService(IBaseRepository<Disciplina> repositorio)
     {
-        private readonly EscolaDbContext _context;
+        _repositorio = repositorio;
+    }
 
-        public DisciplinaService(EscolaDbContext context)
+    public async Task<IEnumerable<DisciplinaResponseDto>> ObterTodosAsync()
+    {
+        var disciplinas = await _repositorio.ObterTodosAsync();
+
+        return disciplinas.Select(d => new DisciplinaResponseDto
         {
-            _context = context;
-        }
+            Id = d.Id,
+            Nome = d.Nome,
+            CargaHoraria = d.CargaHoraria
+        });
+    }
 
-        public async Task<IEnumerable<DisciplinaResponseDto>> ObterTodosAsync()
+    public async Task<DisciplinaResponseDto?> ObterPorIdAsync(int id)
+    {
+        var disciplina = await _repositorio.ObterPorIdAsync(id);
+        if (disciplina == null) return null;
+
+        return new DisciplinaResponseDto
         {
-            return await _context.Disciplinas
-                .AsNoTracking()
-                .Select(d => new DisciplinaResponseDto
-                {
-                    Id = d.Id,
-                    Nome = d.Nome,
-                    CargaHoraria = d.CargaHoraria
-                })
-                .ToListAsync();
-        }
+            Id = disciplina.Id,
+            Nome = disciplina.Nome,
+            CargaHoraria = disciplina.CargaHoraria
+        };
+    }
 
-        public async Task<DisciplinaResponseDto> ObterPorIdAsync(int id)
+    public async Task<DisciplinaResponseDto> CriarAsync(DisciplinaRequestDto request)
+    {
+        var disciplina = new Disciplina
         {
-            var disciplina = await _context.Disciplinas
-                .AsNoTracking()
-                .FirstOrDefaultAsync(d => d.Id == id);
+            Nome = request.Nome,
+            CargaHoraria = request.CargaHoraria
+        };
 
-            if (disciplina == null) return null;
+        var criada = await _repositorio.CriarAsync(disciplina);
 
-            return new DisciplinaResponseDto
-            {
-                Id = disciplina.Id,
-                Nome = disciplina.Nome,
-                CargaHoraria = disciplina.CargaHoraria
-            };
-        }
-
-        public async Task<DisciplinaResponseDto> CriarAsync(DisciplinaRequestDto request)
+        return new DisciplinaResponseDto
         {
-            var disciplina = new Disciplina
-            {
-                Nome = request.Nome,
-                CargaHoraria = request.CargaHoraria
-            };
+            Id = criada.Id,
+            Nome = criada.Nome,
+            CargaHoraria = criada.CargaHoraria
+        };
+    }
 
-            _context.Disciplinas.Add(disciplina);
-            await _context.SaveChangesAsync();
+    public async Task<bool> AtualizarAsync(int id, DisciplinaRequestDto request)
+    {
+        var disciplina = await _repositorio.ObterPorIdAsync(id);
+        if (disciplina == null) return false;
 
-            return new DisciplinaResponseDto
-            {
-                Id = disciplina.Id,
-                Nome = disciplina.Nome,
-                CargaHoraria = disciplina.CargaHoraria
-            };
-        }
+        disciplina.Nome = request.Nome;
+        disciplina.CargaHoraria = request.CargaHoraria;
 
-        public async Task<bool> AtualizarAsync(int id, DisciplinaRequestDto request)
-        {
-            var disciplina = await _context.Disciplinas.FindAsync(id);
+        await _repositorio.AtualizarAsync(disciplina);
+        return true;
+    }
 
-            if (disciplina == null) return false;
+    public async Task<bool> DeletarAsync(int id)
+    {
+        var disciplina = await _repositorio.ObterPorIdAsync(id);
+        if (disciplina == null) return false;
 
-            disciplina.Nome = request.Nome;
-            disciplina.CargaHoraria = request.CargaHoraria;
-
-            _context.Disciplinas.Update(disciplina);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> DeletarAsync(int id)
-        {
-            var disciplina = await _context.Disciplinas.FindAsync(id);
-
-            if (disciplina == null) return false;
-
-            _context.Disciplinas.Remove(disciplina);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
+        await _repositorio.DeletarAsync(disciplina);
+        return true;
     }
 }

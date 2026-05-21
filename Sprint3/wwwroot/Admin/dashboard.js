@@ -26,7 +26,7 @@
             ],
             formFields: [
                 { name: 'loginCpf', label: 'CPF de Login (Apenas números)', type: 'text', required: true, onlyCreate: true },
-                { name: 'loginSenha', label: 'Senha de Acesso', type: 'password', required: true, onlyCreate: true },
+                { name: 'loginSenha', label: 'Senha de Acesso (Senha Padrão: Aluno@123)', type: 'password', required: true, onlyCreate: true },
                 { name: 'turmaId', label: 'ID da Turma (Opcional)', type: 'number' },
                 { name: 'nome', label: 'Nome Completo', type: 'text', required: true },
                 { name: 'dataNascimento', label: 'Data de Nascimento', type: 'date', required: true },
@@ -52,7 +52,7 @@
             ],
             formFields: [
                 { name: 'loginCpf', label: 'CPF de Login', type: 'text', required: true, onlyCreate: true },
-                { name: 'loginSenha', label: 'Senha de Acesso', type: 'password', required: true, onlyCreate: true },
+                { name: 'loginSenha', label: 'Senha de Acesso (Senha Padrão: Aluno@123)', type: 'password', required: true, onlyCreate: true },
                 { name: 'nome', label: 'Nome do Professor', type: 'text', required: true },
                 { name: 'telefone', label: 'Telefone', type: 'text', required: true },
                 { name: 'especialidade', label: 'Especialidade', type: 'text' }
@@ -89,6 +89,44 @@
                 { name: 'anoEscolar', label: 'Ano Escolar', type: 'text', required: true },
                 { name: 'anoLetivo', label: 'Ano Letivo', type: 'number', required: true },
                 { name: 'turno', label: 'Turno', type: 'select', required: true, options: [{ value: '0', label: 'Matutino' }, { value: '1', label: 'Vespertino' }] }
+            ]
+        },
+        diarioclasse: {
+            endpoint: '/api/diarioclasse',
+            title: 'Diários de Classe',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'nomeTurma', label: 'Turma' },
+                { key: 'nomeDisciplina', label: 'Disciplina' },
+                { key: 'nomeProfessor', label: 'Professor Responsável' }
+            ],
+            formFields: [
+                // Opcional: No futuro você pode transformar esses inputs em 'select' buscando das APIs de turma/disciplina/professor
+                { name: 'turmaId', label: 'ID da Turma', type: 'number', required: true, onlyCreate: true },
+                { name: 'disciplinaId', label: 'ID da Disciplina', type: 'number', required: true, onlyCreate: true },
+                { name: 'professorId', label: 'ID do Professor Responsável', type: 'number', required: true }
+            ]
+        },
+        boletim: {
+            endpoint: '/api/boletim',
+            title: 'Boletins',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'nomeAluno', label: 'Aluno' },
+                { key: 'nomeDisciplina', label: 'Disciplina/Matéria' },
+                { key: 'notaU1', label: 'U1', format: v => Number(v).toFixed(1) },
+                { key: 'notaU2', label: 'U2', format: v => Number(v).toFixed(1) },
+                { key: 'notaU3', label: 'U3', format: v => Number(v).toFixed(1) },
+                { key: 'mediaFinal', label: 'Média Final', format: v => `<strong>${Number(v).toFixed(1)}</strong>` },
+                { key: 'frequencia', label: 'Frequência', format: v => `${Number(v).toFixed(0)}%` }
+            ],
+            formFields: [
+                { name: 'alunoId', label: 'ID do Aluno', type: 'number', required: true, onlyCreate: true },
+                { name: 'turmaDisciplinaId', label: 'ID do Diário (Turma/Disciplina)', type: 'number', required: true, onlyCreate: true },
+                { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', required: true },
+                { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', required: true },
+                { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', required: true },
+                { name: 'frequencia', label: 'Percentual de Frequência (0 a 100)', type: 'number', required: true }
             ]
         }
     };

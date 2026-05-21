@@ -16,7 +16,7 @@ public class TurmaService : ITurmaService
         _context = context;
     }
 
-    public async Task<IEnumerable<TurmaResponseDto>> ObterTodasAsync()
+    public async Task<IEnumerable<TurmaResponseDto>> ObterTodosAsync()
     {
         return await _context.Turmas
             .Select(t => new TurmaResponseDto

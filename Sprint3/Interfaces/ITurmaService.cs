@@ -1,13 +1,9 @@
 ﻿using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Response;
+using HilbertoSilva.Services.Interfaces;
 
 namespace HilbertoSilva.Interfaces;
 
-public interface ITurmaService
+public interface ITurmaService : IBaseService<TurmaRequestDto, TurmaRequestDto, TurmaResponseDto>
 {
-    Task<IEnumerable<TurmaResponseDto>> ObterTodasAsync();
-    Task<TurmaResponseDto?> ObterPorIdAsync(int id);
-    Task<TurmaResponseDto> CriarAsync(TurmaRequestDto dto);
-    Task<bool> AtualizarAsync(int id, TurmaRequestDto dto);
-    Task<bool> DeletarAsync(int id);
 }
