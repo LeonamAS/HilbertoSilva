@@ -92,6 +92,18 @@
                 background-color: #458d7a;
                 color: white;
             }
+
+        .btn-logout {
+            background-color: #dc3545 !important;
+            color: white !important;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-logout:hover {
+                background-color: #bb2d3b !important;
+            }
     </style>
 </head>
 <body>
@@ -112,12 +124,17 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" data-entity="disciplina">
+                            <i class="fas fa-book"></i> Disciplinas
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" data-entity="turma">
-                            <i class="fas fa-users-class"></i> Turmas
+                            <i class="fas fa-school"></i> Turmas
                         </a>
                     </li>
                     <li class="nav-item mt-5">
-                        <a class="nav-link text-danger" href="#" id="btnLogout">
+                        <a class="nav-link btn-logout" href="#" id="btnLogout">
                             <i class="fas fa-sign-out-alt"></i> Sair
                         </a>
                     </li>

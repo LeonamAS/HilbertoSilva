@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using HilbertoSilva.DTOs.Request;
-using HilbertoSilva.DTOs.Response;
 using HilbertoSilva.Interfaces;
+using HilbertoSilva.DTOs.Request.Create;
 
 namespace HilbertoSilva.Controllers;
 

@@ -1,26 +1,19 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
-    // Validação de Autenticação
     const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/index.html';
-        return;
-    }
+    if (!token) return window.location.href = '/index.html';
 
-    // Elementos da UI
-    const tableHead = document.getElementById('tableHead');
-    const tableBody = document.getElementById('tableBody');
-    const pageTitle = document.getElementById('pageTitle');
-    const formFieldsContainer = document.getElementById('formFieldsContainer');
-    const dynamicForm = document.getElementById('dynamicForm');
-    const entityIdInput = document.getElementById('entityId');
-    const modalTitle = document.getElementById('modalTitle');
-    const alertFeedback = document.getElementById('alertFeedback');
+    const el = {
+        tableHead: document.getElementById('tableHead'),
+        tableBody: document.getElementById('tableBody'),
+        pageTitle: document.getElementById('pageTitle'),
+        fieldsContainer: document.getElementById('formFieldsContainer'),
+        form: document.getElementById('dynamicForm'),
+        idInput: document.getElementById('entityId'),
+        modalTitle: document.getElementById('modalTitle'),
+        alert: document.getElementById('alertFeedback'),
+        modal: new bootstrap.Modal(document.getElementById('formModal'))
+    };
 
-    const formModal = new bootstrap.Modal(document.getElementById('formModal'));
-
-    // ==========================================
-    // CONFIGURAÇÃO DE ENTIDADES (Espelhando DTOs)
-    // ==========================================
     const config = {
         alunos: {
             endpoint: '/api/alunos',
@@ -32,19 +25,21 @@
                 { key: 'nomeResponsavel', label: 'Responsável' }
             ],
             formFields: [
-                // Campos de Usuário
-                { name: 'loginCpf', label: 'CPF de Login do Aluno (Apenas números)', type: 'text', required: true, onlyCreate: true },
-                { name: 'loginSenha', label: 'Senha de Acesso (Senha padrão: Aluno@123)', type: 'password', required: true, onlyCreate: true },
-
-                // Campos de Aluno
-                { name: 'turmaId', label: 'ID da Turma (Opcional)', type: 'number', required: false },
+                { name: 'loginCpf', label: 'CPF de Login (Apenas números)', type: 'text', required: true, onlyCreate: true },
+                { name: 'loginSenha', label: 'Senha de Acesso', type: 'password', required: true, onlyCreate: true },
+                { name: 'turmaId', label: 'ID da Turma (Opcional)', type: 'number' },
                 { name: 'nome', label: 'Nome Completo', type: 'text', required: true },
                 { name: 'dataNascimento', label: 'Data de Nascimento', type: 'date', required: true },
                 { name: 'matricula', label: 'Matrícula', type: 'text', required: true },
                 { name: 'nomeResponsavel', label: 'Nome do Responsável', type: 'text', required: true },
-                { name: 'cpfResponsavel', label: 'CPF do Responsável (Apenas números)', type: 'text', required: true },
+                { name: 'cpfResponsavel', label: 'CPF do Responsável', type: 'text', required: true },
                 { name: 'telefoneResponsavel', label: 'Telefone do Responsável', type: 'text', required: true }
-            ]
+            ],
+
+            buildPayload: (data, id) => id ? data : {
+                usuario: { cpf: data.loginCpf, senha: data.loginSenha, tipoUsuario: "Aluno" },
+                aluno: { ...data, turmaId: data.turmaId ? Number(data.turmaId) : null }
+            }
         },
         professor: {
             endpoint: '/api/professor',
@@ -56,14 +51,28 @@
                 { key: 'telefone', label: 'Telefone' }
             ],
             formFields: [
-                // Campos de Usuário
-                { name: 'loginCpf', label: 'CPF de Login (Apenas números)', type: 'text', required: true, onlyCreate: true },
-                { name: 'loginSenha', label: 'Senha de Acesso (Senha padrão: Professor@123)', type: 'password', required: true, onlyCreate: true },
-
-                // Campos de Professor
+                { name: 'loginCpf', label: 'CPF de Login', type: 'text', required: true, onlyCreate: true },
+                { name: 'loginSenha', label: 'Senha de Acesso', type: 'password', required: true, onlyCreate: true },
                 { name: 'nome', label: 'Nome do Professor', type: 'text', required: true },
                 { name: 'telefone', label: 'Telefone', type: 'text', required: true },
-                { name: 'especialidade', label: 'Especialidade', type: 'text', required: false }
+                { name: 'especialidade', label: 'Especialidade', type: 'text' }
+            ],
+            buildPayload: (data, id) => id ? data : {
+                usuario: { cpf: data.loginCpf, senha: data.loginSenha, tipoUsuario: "Professor" },
+                professor: data
+            }
+        },
+        disciplina: {
+            endpoint: '/api/disciplina',
+            title: 'Disciplinas',
+            columns: [
+                { key: 'id', label: 'ID' },
+                { key: 'nome', label: 'Nome da Disciplina' },
+                { key: 'cargaHoraria', label: 'Carga Horária (Horas)', format: v => `${v}h` }
+            ],
+            formFields: [
+                { name: 'nome', label: 'Nome da Disciplina (ex: Matemática)', type: 'text', required: true, maxLength: 50 },
+                { name: 'cargaHoraria', label: 'Carga Horária (Horas)', type: 'number', required: true }
             ]
         },
         turma: {
@@ -73,278 +82,179 @@
                 { key: 'id', label: 'ID' },
                 { key: 'nomeTurma', label: 'Nome' },
                 { key: 'anoEscolar', label: 'Ano Escolar' },
-                { key: 'turno', label: 'Turno' }
+                { key: 'turno', label: 'Turno', format: v => String(v).toUpperCase().includes('VESPERTINO') || v == 1 ? 'Vespertino' : 'Matutino' }
             ],
             formFields: [
-                { name: 'nomeTurma', label: 'Nome da Turma (ex: A, B...)', type: 'text', required: true },
-                { name: 'anoEscolar', label: 'Ano Escolar (ex: 6º Ano)', type: 'text', required: true },
-                { name: 'anoLetivo', label: 'Ano Letivo (ex: 2024)', type: 'number', required: true },
-                {
-                    name: 'turno',
-                    label: 'Turno',
-                    type: 'select',
-                    required: true,
-                    options: [
-                        { value: '0', label: 'Matutino' },
-                        { value: '1', label: 'Vespertino' }
-                    ]
-                }
+                { name: 'nomeTurma', label: 'Nome da Turma', type: 'text', required: true },
+                { name: 'anoEscolar', label: 'Ano Escolar', type: 'text', required: true },
+                { name: 'anoLetivo', label: 'Ano Letivo', type: 'number', required: true },
+                { name: 'turno', label: 'Turno', type: 'select', required: true, options: [{ value: '0', label: 'Matutino' }, { value: '1', label: 'Vespertino' }] }
             ]
         }
     };
 
     let currentEntity = 'alunos';
 
-    // ==========================================
-    // FUNÇÕES DE API
-    // ==========================================
     async function apiFetch(url, options = {}) {
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            ...options.headers
-        };
+        const response = await fetch(url, {
+            ...options,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers }
+        });
 
-        const response = await fetch(url, { ...options, headers });
-
-        if (response.status === 401 || response.status === 403) {
+        if ([401, 403].includes(response.status)) {
             localStorage.removeItem('token');
             window.location.href = '/index.html';
-            throw new Error('Sessão expirada ou acesso negado.');
+            throw new Error('Sessão expirada.');
         }
-
         if (response.status === 204) return null;
 
         const data = await response.json().catch(() => ({}));
-
         if (!response.ok) {
-            if (data.errors) {
-                const primeirasMensagens = Object.values(data.errors).map(err => err.join(', ')).join(' | ');
-                throw new Error(primeirasMensagens);
-            }
-            throw new Error(data.mensagem || `Erro HTTP: ${response.status}`);
+            throw new Error(data.errors ? Object.values(data.errors).map(e => e.join(', ')).join(' | ') : data.mensagem || `Erro: ${response.status}`);
         }
-
         return data;
     }
 
-    // ==========================================
-    // RENDERIZAÇÃO DA INTERFACE
-    // ==========================================
+    function exibirAlerta(msg, tipo) {
+        el.alert.textContent = msg;
+        el.alert.className = `alert alert-${tipo} mb-4`;
+        setTimeout(() => el.alert.classList.add('d-none'), 5000);
+    }
+
     async function loadData() {
         const conf = config[currentEntity];
-        pageTitle.textContent = `Gerenciar ${conf.title}`;
-
-        let thHtml = '<tr>';
-        conf.columns.forEach(col => thHtml += `<th>${col.label}</th>`);
-        thHtml += '<th class="text-end">Ações</th></tr>';
-        tableHead.innerHTML = thHtml;
-
-        tableBody.innerHTML = '<tr><td colspan="100%" class="text-center">Carregando...</td></tr>';
+        el.pageTitle.textContent = `Gerenciar ${conf.title}`;
+        el.tableHead.innerHTML = `<tr>${conf.columns.map(c => `<th>${c.label}</th>`).join('')}<th class="text-end">Ações</th></tr>`;
+        el.tableBody.innerHTML = '<tr><td colspan="100%" class="text-center">Carregando...</td></tr>';
 
         try {
             const data = await apiFetch(conf.endpoint);
-
-            if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="100%" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
+            if (!data?.length) {
+                el.tableBody.innerHTML = '<tr><td colspan="100%" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
                 return;
             }
 
-            tableBody.innerHTML = data.map(item => {
-                let tr = '<tr>';
-                conf.columns.forEach(col => {
-                    let valor = item[col.key];
-
-                    if (col.key === 'turno') {
-                        if (valor === 0 || valor === 'MATUTINO' || String(valor).toUpperCase() === 'MATUTINO') valor = 'Matutino';
-                        else if (valor === 1 || valor === 'VESPERTINO' || String(valor).toUpperCase() === 'VESPERTINO') valor = 'Vespertino';
-                    }
-
-                    tr += `<td>${valor !== null && valor !== undefined && valor !== '' ? valor : '-'}</td>`;
-                });
-                tr += `
+            el.tableBody.innerHTML = data.map(item => `
+                <tr>
+                    ${conf.columns.map(c => `<td>${c.format ? c.format(item[c.key]) : (item[c.key] ?? '-')}</td>`).join('')}
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editItem(${item.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteItem(${item.id})"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-outline-primary me-2 btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.id}"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>`;
-                return tr;
-            }).join('');
-
+                </tr>`).join('');
         } catch (error) {
-            exibirAlerta(`Erro ao carregar dados: ${error.message}`, 'danger');
-            tableBody.innerHTML = '<tr><td colspan="100%" class="text-center text-danger">Falha ao carregar os dados.</td></tr>';
+            exibirAlerta(`Erro: ${error.message}`, 'danger');
+            el.tableBody.innerHTML = '<tr><td colspan="100%" class="text-center text-danger">Falha ao carregar dados.</td></tr>';
         }
     }
 
     function buildForm(id = null) {
-        const conf = config[currentEntity];
-        formFieldsContainer.innerHTML = '';
+        el.fieldsContainer.innerHTML = config[currentEntity].formFields
+            .filter(f => !(id && f.onlyCreate))
+            .map(f => {
+                let inputHtml = '';
 
-        conf.formFields.forEach(field => {
-            if (id && field.onlyCreate) return;
+                if (f.type === 'select') {
+                    inputHtml = `
+                        <select class="form-select" name="${f.name}" ${f.required ? 'required' : ''}>
+                            <option value="" disabled selected>Selecione...</option>
+                            ${f.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+                        </select>`;
+                }
+                else if (f.type === 'password') {
+                    inputHtml = `
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="${f.name}" id="input-${f.name}" ${f.required ? 'required' : ''}>
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="input-${f.name}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>`;
+                }
+                else {
+                    inputHtml = `<input type="${f.type}" class="form-control" name="${f.name}" ${f.required ? 'required' : ''} ${f.maxLength ? `maxlength="${f.maxLength}"` : ''}>`;
+                }
 
-            let inputHtml = '';
-
-            if (field.type === 'select') {
-                const optionsHtml = field.options.map(opt =>
-                    `<option value="${opt.value}">${opt.label}</option>`
-                ).join('');
-
-                inputHtml = `
-                    <select class="form-select" name="${field.name}" ${field.required ? 'required' : ''}>
-                        <option value="" disabled selected>Selecione...</option>
-                        ${optionsHtml}
-                    </select>`;
-            } else {
-                inputHtml = `
-                    <input type="${field.type}" class="form-control" name="${field.name}" 
-                        ${field.required ? 'required' : ''} 
-                        ${field.maxLength ? `maxlength="${field.maxLength}"` : ''}>`;
-            }
-
-            formFieldsContainer.innerHTML += `
+                return `
                 <div class="mb-3">
-                    <label class="form-label">${field.label}</label>
+                    <label class="form-label">${f.label}</label>
                     ${inputHtml}
-                </div>
-            `;
-        });
+                </div>`;
+            }).join('');
     }
 
-    // ==========================================
-    // AÇÕES DE CRUD
-    // ==========================================
-    window.editItem = async (id) => {
+    async function editItem(id) {
         const conf = config[currentEntity];
         try {
             const item = await apiFetch(`${conf.endpoint}/${id}`);
-
-            dynamicForm.reset();
+            el.form.reset();
             buildForm(id);
+            el.idInput.value = id;
+            el.modalTitle.textContent = `Editar ${conf.title}`;
 
-            entityIdInput.value = id;
-            modalTitle.textContent = `Editar ${conf.title}`;
-
-            conf.formFields.forEach(field => {
-                const input = dynamicForm.elements[field.name];
+            conf.formFields.forEach(f => {
+                const input = el.form.elements[f.name];
                 if (!input) return;
 
-                let valor = item[field.name];
+                let val = item[f.name];
+                if (f.type === 'date' && val) val = val.split('T')[0];
+                if (f.name === 'turno') val = String(val).toUpperCase().includes('VESPERTINO') || val == 1 ? '1' : '0';
 
-                if (field.type === 'date' && valor) {
-                    input.value = valor.split('T')[0];
-                }
-                else if (field.name === 'turno') {
-                    if (String(valor).toUpperCase() === 'MATUTINO') input.value = '0';
-                    else if (String(valor).toUpperCase() === 'VESPERTINO') input.value = '1';
-                    else input.value = (valor !== null && valor !== undefined) ? valor : '';
-                }
-                else {
-                    input.value = (valor !== null && valor !== undefined) ? valor : '';
-                }
-
-                if (id && field.name === 'matricula') {
-                    input.disabled = true;
-                }
+                input.value = val ?? '';
+                if (f.name === 'matricula') input.disabled = true;
             });
-
-            formModal.show();
+            el.modal.show();
         } catch (error) {
-            exibirAlerta(`Erro ao buscar dados: ${error.message}`, 'danger');
+            exibirAlerta(`Erro ao buscar: ${error.message}`, 'danger');
         }
-    };
+    }
 
-    window.deleteItem = async (id) => {
-        if (!confirm('Tem certeza que deseja excluir este registro? A ação não pode ser desfeita.')) return;
-
+    async function deleteItem(id) {
+        if (!confirm('Tem certeza que deseja excluir?')) return;
         try {
             await apiFetch(`${config[currentEntity].endpoint}/${id}`, { method: 'DELETE' });
-            exibirAlerta('Registro excluído com sucesso!', 'success');
+            exibirAlerta('Registro excluído!', 'success');
             loadData();
         } catch (error) {
-            exibirAlerta(`Falha ao excluir: ${error.message}`, 'danger');
+            exibirAlerta(`Falha: ${error.message}`, 'danger');
         }
-    };
+    }
 
-    // ==========================================
-    // EVENT LISTENERS
-    // ==========================================
+    el.tableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (btn.classList.contains('btn-edit')) editItem(id);
+        if (btn.classList.contains('btn-delete')) deleteItem(id);
+    });
+
     document.getElementById('btnAddNew').addEventListener('click', () => {
-        dynamicForm.reset();
-        entityIdInput.value = '';
-        modalTitle.textContent = `Adicionar Novo(a) ${config[currentEntity].title}`;
+        el.form.reset();
+        el.idInput.value = '';
+        el.modalTitle.textContent = `Adicionar Novo(a) ${config[currentEntity].title}`;
         buildForm(null);
-        formModal.show();
+        el.modal.show();
     });
 
     document.getElementById('btnSaveEntity').addEventListener('click', async () => {
-        if (!dynamicForm.checkValidity()) {
-            dynamicForm.reportValidity();
-            return;
-        }
+        if (!el.form.checkValidity()) return el.form.reportValidity();
 
         const conf = config[currentEntity];
-        const id = entityIdInput.value;
-        const method = id ? 'PUT' : 'POST';
-        let url = id ? `${conf.endpoint}/${id}` : conf.endpoint;
-        let payload = {};
+        const id = el.idInput.value;
 
-        if (currentEntity === 'alunos' && !id) {
-            url = `${conf.endpoint}/com-usuario`;
+        const rawData = Object.fromEntries(new FormData(el.form));
 
-            payload = {
-                usuario: {
-                    cpf: dynamicForm.elements['loginCpf'].value,
-                    senha: dynamicForm.elements['loginSenha'].value,
-                    tipoUsuario: "Aluno"
-                },
-                aluno: {
-                    turmaId: dynamicForm.elements['turmaId'].value ? Number(dynamicForm.elements['turmaId'].value) : null,
-                    nome: dynamicForm.elements['nome'].value,
-                    dataNascimento: dynamicForm.elements['dataNascimento'].value,
-                    matricula: dynamicForm.elements['matricula'].value,
-                    nomeResponsavel: dynamicForm.elements['nomeResponsavel'].value,
-                    cpfResponsavel: dynamicForm.elements['cpfResponsavel'].value,
-                    telefoneResponsavel: dynamicForm.elements['telefoneResponsavel'].value
-                }
-            };
-        } else if (currentEntity === 'professor' && !id) {
-            url = `${conf.endpoint}/com-usuario`;
-            payload = {
-                usuario: {
-                    cpf: dynamicForm.elements['loginCpf'].value,
-                    senha: dynamicForm.elements['loginSenha'].value,
-                    tipoUsuario: "Professor"
-                },
-                professor: {
-                    nome: dynamicForm.elements['nome'].value,
-                    telefone: dynamicForm.elements['telefone'].value,
-                    especialidade: dynamicForm.elements['especialidade'].value || null
-                }
-            };
-        } else {
-            conf.formFields.forEach(field => {
-                const input = dynamicForm.elements[field.name];
-                if (!input || (id && input.disabled)) return;
+        conf.formFields.forEach(f => {
+            if ((f.type === 'number' || f.type === 'select') && rawData[f.name]) {
+                rawData[f.name] = Number(rawData[f.name]);
+            }
+        });
 
-                let val = input.value;
-
-                if (field.type === 'number' || (field.type === 'select' && !isNaN(val))) {
-                    val = val !== '' ? Number(val) : null;
-                }
-
-                payload[field.name] = val;
-            });
-        }
+        const payload = conf.buildPayload ? conf.buildPayload(rawData, id) : rawData;
+        const url = !id && (currentEntity === 'alunos' || currentEntity === 'professor') ? `${conf.endpoint}/com-usuario` : (id ? `${conf.endpoint}/${id}` : conf.endpoint);
 
         try {
-            await apiFetch(url, {
-                method: method,
-                body: JSON.stringify(payload)
-            });
-
-            formModal.hide();
+            await apiFetch(url, { method: id ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+            el.modal.hide();
             exibirAlerta('Salvo com sucesso!', 'success');
             loadData();
         } catch (error) {
@@ -357,23 +267,31 @@
             e.preventDefault();
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             e.currentTarget.classList.add('active');
-
             currentEntity = e.currentTarget.getAttribute('data-entity');
             loadData();
         });
     });
 
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
+    document.getElementById('btnLogout').addEventListener('click', () => {
         localStorage.removeItem('token');
         window.location.href = '/index.html';
     });
 
-    function exibirAlerta(mensagem, tipo) {
-        alertFeedback.textContent = mensagem;
-        alertFeedback.className = `alert alert-${tipo} mb-4`;
-        setTimeout(() => alertFeedback.classList.add('d-none'), 5000);
-    }
+    document.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('.toggle-password');
+        if (!toggleBtn) return;
+
+        const targetInput = document.getElementById(toggleBtn.dataset.target);
+        const icon = toggleBtn.querySelector('i');
+
+        if (targetInput.type === 'password') {
+            targetInput.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            targetInput.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
 
     loadData();
 });

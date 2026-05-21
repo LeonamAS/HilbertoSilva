@@ -1,4 +1,4 @@
-﻿using HilbertoSilva.DTOs.Request;
+﻿using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Response;
 
 namespace HilbertoSilva.Interfaces;

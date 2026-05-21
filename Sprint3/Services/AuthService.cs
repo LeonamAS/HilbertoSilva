@@ -1,5 +1,7 @@
 ﻿using HilbertoSilva.Data;
 using HilbertoSilva.DTOs.Request;
+using HilbertoSilva.DTOs.Request.Create;
+using HilbertoSilva.DTOs.Request.Update;
 using HilbertoSilva.Interfaces;
 using HilbertoSilva.Models;
 using Microsoft.EntityFrameworkCore;

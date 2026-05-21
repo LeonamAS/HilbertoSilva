@@ -1,6 +1,7 @@
 using HilbertoSilva.Data;
 using HilbertoSilva.Interfaces;
 using HilbertoSilva.Services;
+using HilbertoSilva.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -85,10 +86,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IProfessorService, ProfessorService>();
 builder.Services.AddScoped<ITurmaService, TurmaService>();
+builder.Services.AddScoped<IDisciplinaService, DisciplinaService>();
 
 var app = builder.Build();
 
-// Configurações do pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

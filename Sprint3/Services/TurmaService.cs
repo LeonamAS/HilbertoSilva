@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using HilbertoSilva.Data;
-using HilbertoSilva.DTOs.Request;
 using HilbertoSilva.DTOs.Response;
 using HilbertoSilva.Interfaces;
 using HilbertoSilva.Models;
+using HilbertoSilva.DTOs.Request.Create;
 
 namespace HilbertoSilva.Services;
 

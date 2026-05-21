@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HilbertoSilva.DTOs.Request;
+namespace HilbertoSilva.DTOs.Request.Update;
 
 public class UpdateBoletimDto
 {

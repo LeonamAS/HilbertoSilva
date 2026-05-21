@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using HilbertoSilva.Models.Enum;
 
-namespace HilbertoSilva.DTOs.Request;
+namespace HilbertoSilva.DTOs.Request.Create;
 
 public class CreateUsuarioDto
 {

@@ -1,4 +1,6 @@
 ﻿using HilbertoSilva.DTOs.Request;
+using HilbertoSilva.DTOs.Request.Create;
+using HilbertoSilva.DTOs.Request.Update;
 using HilbertoSilva.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

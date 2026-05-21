@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HilbertoSilva.DTOs.Request;
+namespace HilbertoSilva.DTOs.Request.Create;
 
-public class UpdateProfessorDto
+public class CreateProfessorDto
 {
     [Required(ErrorMessage = "O nome do professor é obrigatório.")]
     [StringLength(255)]
