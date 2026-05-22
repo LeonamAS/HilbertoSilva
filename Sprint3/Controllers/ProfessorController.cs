@@ -45,9 +45,19 @@ public class ProfessorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ProfessorResponseDto>> CreateComUsuario([FromBody] CreateProfessorComUsuarioDto dto)
     {
-        var novoProfessor = await _professorService.CriarAsync(dto);
-
-        return CreatedAtAction(nameof(ObterPorId), new { id = novoProfessor.Id }, novoProfessor);
+        try
+        {
+            var novoProfessor = await _professorService.CriarAsync(dto);
+            return CreatedAtAction(nameof(ObterPorId), new { id = novoProfessor.Id }, novoProfessor);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -56,12 +66,19 @@ public class ProfessorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Atualizar(int id, [FromBody] UpdateProfessorDto dto)
     {
-        var sucesso = await _professorService.AtualizarAsync(id, dto);
+        try
+        {
+            var sucesso = await _professorService.AtualizarAsync(id, dto);
 
-        if (!sucesso)
-            return NotFound(new { mensagem = "Não foi possível atualizar. Professor não encontrado." });
+            if (!sucesso)
+                return NotFound(new { mensagem = "Não foi possível atualizar. Professor não encontrado." });
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]

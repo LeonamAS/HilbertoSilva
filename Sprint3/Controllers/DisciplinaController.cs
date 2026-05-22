@@ -8,7 +8,7 @@ namespace HilbertoSilva.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
+    [Authorize(Roles = "ADMIN")]
     public class DisciplinaController : ControllerBase
     {
         private readonly IDisciplinaService _disciplinaService;

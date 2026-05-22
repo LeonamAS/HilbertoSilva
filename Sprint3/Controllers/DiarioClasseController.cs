@@ -9,7 +9,7 @@ namespace HilbertoSilva.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-[ApiController]
+[Authorize(Roles = "ADMIN")]
 public class DiarioClasseController : ControllerBase
 {
     private readonly IDiarioClasseService _diarioService;

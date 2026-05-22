@@ -6,144 +6,62 @@
     <title>Admin Dashboard - Hilberto Silva</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --primary-green: #54a790;
-            --dark-bg: #2E4D68;
-            --light-bg: #f4f7f6;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background-color: var(--primary-green);
-            min-height: 100vh;
-            color: white;
-            padding-top: 20px;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-        }
-
-            .sidebar h4 {
-                text-align: center;
-                font-weight: bold;
-                margin-bottom: 30px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid rgba(255,255,255,0.2);
-            }
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            margin: 5px 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-            .nav-link:hover, .nav-link.active {
-                background-color: white;
-                color: var(--primary-green);
-            }
-
-            .nav-link i {
-                width: 25px;
-            }
-
-        /* Main Content */
-        .main-content {
-            padding: 30px;
-        }
-
-        .header-action {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .card-custom {
-            background: white;
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .table-custom th {
-            background-color: var(--primary-green);
-            color: white;
-            font-weight: 600;
-        }
-
-        .table-custom td {
-            vertical-align: middle;
-        }
-
-        .btn-green {
-            background-color: var(--primary-green);
-            color: white;
-            border: none;
-        }
-
-            .btn-green:hover {
-                background-color: #458d7a;
-                color: white;
-            }
-
-        .btn-logout {
-            background-color: #dc3545 !important;
-            color: white !important;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-            .btn-logout:hover {
-                background-color: #bb2d3b !important;
-            }
-    </style>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
 
+    <div class="d-lg-none d-flex justify-content-between align-items-center p-3 text-white shadow-sm" style="background-color: var(--primary-green);">
+        <h5 class="m-0 fw-bold">Portal Admin</h5>
+        <button class="btn btn-outline-light border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+    </div>
+
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2 d-none d-md-block sidebar">
-                <h4>Portal Admin</h4>
-                <ul class="nav flex-column" id="menuSidebar">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" data-entity="alunos">
-                            <i class="fas fa-user-graduate"></i> Alunos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-entity="professor">
-                            <i class="fas fa-chalkboard-teacher"></i> Professores
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-entity="disciplina">
-                            <i class="fas fa-book"></i> Disciplinas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-entity="turma">
-                            <i class="fas fa-school"></i> Turmas
-                        </a>
-                    </li>
-                    <li class="nav-item mt-5">
-                        <a class="nav-link btn-logout" href="#" id="btnLogout">
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
-                    </li>
-                </ul>
+
+            <div class="col-lg-2 sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+
+                <div class="offcanvas-header d-lg-none border-bottom border-light border-opacity-25 pb-3 mb-3">
+                    <h5 class="offcanvas-title text-white fw-bold" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body d-flex flex-column p-0">
+                    <h4 class="d-none d-lg-block">Portal Admin</h4>
+                    <ul class="nav flex-column w-100" id="menuSidebar">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-entity="alunos" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu">
+                                <i class="fas fa-user-graduate"></i> Alunos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-entity="professor" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu">
+                                <i class="fas fa-chalkboard-teacher"></i> Professores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-entity="disciplina" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu">
+                                <i class="fas fa-book"></i> Disciplinas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-entity="turma" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu">
+                                <i class="fas fa-school"></i> Turmas
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4 mb-4">
+                            <a class="nav-link btn-logout" href="#" id="btnLogout">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="col-md-10 main-content">
+            <div class="col-lg-10 main-content">
                 <div class="header-action">
-                    <h2 id="pageTitle" style="color: var(--dark-bg); font-weight: bold; display: flex; align-items: center;">Gerenciar Alunos</h2>
+                    <h2 id="pageTitle" style="color: var(--dark-bg); font-weight: bold; display: flex; align-items: center; flex-wrap: wrap;">Gerenciar Alunos</h2>
                     <button class="btn btn-green px-4" id="btnAddNew">
                         <i class="fas fa-plus"></i> Adicionar Novo
                     </button>
@@ -151,23 +69,24 @@
 
                 <div id="alertFeedback" class="alert d-none" role="alert"></div>
 
-                <div class="card card-custom p-4">
+                <div class="card card-custom p-3 p-lg-4">
                     <div class="table-responsive">
-                        <table class="table table-hover table-custom mb-0">
+                        <table class="table table-hover table-custom mb-0 text-nowrap">
                             <thead id="tableHead">
                             </thead>
                             <tbody id="tableBody">
-                                <tr><td colspan="100%" class="text-center">Carregando dados...</td></tr>
+                                <tr><td colspan="100" class="text-center">Carregando dados...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header" style="background-color: var(--primary-green); color: white;">
                     <h5 class="modal-title" id="modalTitle">Cadastrar</h5>

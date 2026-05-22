@@ -45,9 +45,19 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AlunoResponseDto>> CreateComUsuario([FromBody] CreateAlunoComUsuarioDto dto)
     {
-        var novoAluno = await _alunoService.CriarAsync(dto);
-
-        return CreatedAtAction(nameof(GetAlunoPorId), new { id = novoAluno.Id }, novoAluno);
+        try
+        {
+            var novoAluno = await _alunoService.CriarAsync(dto);
+            return CreatedAtAction(nameof(GetAlunoPorId), new { id = novoAluno.Id }, novoAluno);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
@@ -56,12 +66,19 @@ public class AlunosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateAluno(int id, [FromBody] UpdateAlunoDto updateAlunoDto)
     {
-        var atualizado = await _alunoService.AtualizarAsync(id, updateAlunoDto);
+        try
+        {
+            var atualizado = await _alunoService.AtualizarAsync(id, updateAlunoDto);
 
-        if (!atualizado)
-            return NotFound(new { mensagem = "Aluno não encontrado para atualização." });
+            if (!atualizado)
+                return NotFound(new { mensagem = "Aluno não encontrado para atualização." });
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]

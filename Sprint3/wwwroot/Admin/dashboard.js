@@ -78,7 +78,7 @@
             ],
             formFields: [
                 { name: 'loginCpf', label: 'CPF de Login', type: 'text', required: true, onlyCreate: true },
-                { name: 'loginSenha', label: 'Senha de Acesso (Senha Padrão: Aluno@123)', type: 'password', required: true, onlyCreate: true },
+                { name: 'loginSenha', label: 'Senha de Acesso (Senha Padrão: Professor@123)', type: 'password', required: true, onlyCreate: true },
                 { name: 'nome', label: 'Nome do Professor', type: 'text', required: true },
                 { name: 'telefone', label: 'Telefone', type: 'text', required: true },
                 { name: 'especialidade', label: 'Especialidade', type: 'text' }
@@ -134,18 +134,18 @@
             title: 'Boletins',
             columns: [
                 { key: 'nomeDisciplina', label: 'Disciplina' },
-                { key: 'notaU1', label: '1ª Unidade', format: v => Number(v).toFixed(1) },
-                { key: 'notaU2', label: '2ª Unidade', format: v => Number(v).toFixed(1) },
-                { key: 'notaU3', label: '3ª Unidade', format: v => Number(v).toFixed(1) },
-                { key: 'mediaFinal', label: 'Média Final', format: v => `<strong>${Number(v).toFixed(1)}</strong>` },
-                { key: 'frequencia', label: 'Frequência', format: v => `${Number(v).toFixed(0)}%` }
+                { key: 'notaU1', label: '1ª Unidade', format: v => Number(v) < 6 ? `<span class="text-danger fw-bold">${Number(v).toFixed(1)}</span>` : Number(v).toFixed(1) },
+                { key: 'notaU2', label: '2ª Unidade', format: v => Number(v) < 6 ? `<span class="text-danger fw-bold">${Number(v).toFixed(1)}</span>` : Number(v).toFixed(1) },
+                { key: 'notaU3', label: '3ª Unidade', format: v => Number(v) < 6 ? `<span class="text-danger fw-bold">${Number(v).toFixed(1)}</span>` : Number(v).toFixed(1) },
+                { key: 'mediaFinal', label: 'Média Final', format: v => Number(v) < 6 ? `<strong class="text-danger">${Number(v).toFixed(1)}</strong>` : `<strong>${Number(v).toFixed(1)}</strong>` },
+                { key: 'frequencia', label: 'Frequência', format: v => Number(v) < 70 ? `<span class="text-danger fw-bold">${Number(v).toFixed(0)}%</span>` : `${Number(v).toFixed(0)}%` }
             ],
             formFields: [
                 { name: 'alunoId', label: 'ID do Aluno', type: 'number', required: true, onlyCreate: true },
                 { name: 'turmaDisciplinaId', label: 'ID do Diário (Turma/Disciplina)', type: 'number', required: true, onlyCreate: true },
-                { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', required: true },
-                { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', required: true },
-                { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', required: true },
+                { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', required: true, step: '0.1' },
+                { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', required: true, step: '0.1' },
+                { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', required: true, step: '0.1' },
                 { name: 'frequencia', label: 'Percentual de Frequência (0 a 100)', type: 'number', required: true }
             ]
         }
@@ -248,7 +248,7 @@
 
             el.tableBody.innerHTML = data.map(item => `
                 <tr>
-                    ${conf.columns.map(c => `<td>${c.format ? c.format(item[c.key], item) : (item[c.key] ?? '-')}</td>`).join('')}
+                    ${conf.columns.map(c => `<td data-label="${c.label}">${c.format ? c.format(item[c.key], item) : (item[c.key] ?? '-')}</td>`).join('')}
                     <td class="text-end">
                         <button class="btn btn-sm btn-outline-primary me-2 btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.id}"><i class="fas fa-trash"></i></button>
@@ -283,7 +283,7 @@
                         </div>`;
                 }
                 else {
-                    inputHtml = `<input type="${f.type}" class="form-control" name="${f.name}" ${f.required ? 'required' : ''} ${f.maxLength ? `maxlength="${f.maxLength}"` : ''}>`;
+                    inputHtml = `<input type="${f.type}" class="form-control" name="${f.name}" ${f.required ? 'required' : ''} ${f.maxLength ? `maxlength="${f.maxLength}"` : ''} ${f.step ? `step="${f.step}"` : ''}>`;
                 }
 
                 return `
@@ -295,6 +295,9 @@
     }
 
     async function editItem(id) {
+        const erroAntigo = document.getElementById('formErrorFeedback');
+        if (erroAntigo) erroAntigo.classList.add('d-none');
+
         const conf = config[currentEntity];
         try {
             const item = await apiFetch(`${conf.endpoint}/${id}`);
@@ -356,6 +359,9 @@
     });
 
     document.getElementById('btnAddNew').addEventListener('click', () => {
+        const erroAntigo = document.getElementById('formErrorFeedback');
+        if (erroAntigo) erroAntigo.classList.add('d-none');
+
         el.form.reset();
         el.idInput.value = '';
         el.modalTitle.textContent = `Adicionar Novo(a) ${config[currentEntity].title}`;
@@ -387,6 +393,23 @@
 
         const rawData = Object.fromEntries(new FormData(el.form));
 
+        const isCpfValido = (cpf) => {
+            if (!cpf) return false;
+            return cpf.replace(/\D/g, '').length === 11;
+        };
+
+        if (currentEntity === 'alunos' || currentEntity === 'professor') {
+            if (!id && rawData.loginCpf && !isCpfValido(rawData.loginCpf)) {
+                exibirErroFormulario("O CPF de Login está incorreto. Ele deve conter exatamente 11 números.");
+                return;
+            }
+
+            if (currentEntity === 'alunos' && rawData.cpfResponsavel && !isCpfValido(rawData.cpfResponsavel)) {
+                exibirErroFormulario("O CPF do Responsável está incorreto. Ele deve conter exatamente 11 números.");
+                return;
+            }
+        }
+
         conf.formFields.forEach(f => {
             if ((f.type === 'number' || f.type === 'select') && rawData[f.name]) {
                 rawData[f.name] = Number(rawData[f.name]);
@@ -402,7 +425,7 @@
             exibirAlerta('Salvo com sucesso!', 'success');
             loadData();
         } catch (error) {
-            alert(`Falha ao salvar: ${error.message}`);
+            exibirErroFormulario(error.message);
         }
     });
 
@@ -468,16 +491,24 @@
         const info = currentTableData[0];
         const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-        const linhasTabela = currentTableData.map(b => `
+        const linhasTabela = currentTableData.map(b => {
+            const corU1 = Number(b.notaU1) < 6 ? 'text-danger' : '';
+            const corU2 = Number(b.notaU2) < 6 ? 'text-danger' : '';
+            const corU3 = Number(b.notaU3) < 6 ? 'text-danger' : '';
+            const corMedia = Number(b.mediaFinal) < 6 ? 'text-danger' : '';
+            const corFreq = Number(b.frequencia) < 70 ? 'text-danger fw-bold' : '';
+
+            return `
             <tr>
                 <td>${b.nomeDisciplina}</td>
-                <td class="text-center">${Number(b.notaU1).toFixed(1)}</td>
-                <td class="text-center">${Number(b.notaU2).toFixed(1)}</td>
-                <td class="text-center">${Number(b.notaU3).toFixed(1)}</td>
-                <td class="text-center fw-bold">${Number(b.mediaFinal).toFixed(1)}</td>
-                <td class="text-center">${Number(b.frequencia).toFixed(0)}%</td>
+                <td class="text-center ${corU1}">${Number(b.notaU1).toFixed(1)}</td>
+                <td class="text-center ${corU2}">${Number(b.notaU2).toFixed(1)}</td>
+                <td class="text-center ${corU3}">${Number(b.notaU3).toFixed(1)}</td>
+                <td class="text-center fw-bold ${corMedia}">${Number(b.mediaFinal).toFixed(1)}</td>
+                <td class="text-center ${corFreq}">${Number(b.frequencia).toFixed(0)}%</td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         const htmlImpressao = `
             <!DOCTYPE html>
@@ -497,6 +528,7 @@
                     td { border: 1px solid #ddd; padding: 10px; }
                     th.text-center, td.text-center { text-align: center; }
                     .fw-bold { font-weight: bold; }
+                    .text-danger { color: #dc3545 !important; }
                     .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
                     @media print {
                         body { padding: 0; }
@@ -549,6 +581,24 @@
             janelaImpressao.print();
             janelaImpressao.close();
         }, 250);
+    }
+
+    function exibirErroFormulario(msg) {
+        let errorDiv = document.getElementById('formErrorFeedback');
+
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.id = 'formErrorFeedback';
+            el.fieldsContainer.parentNode.insertBefore(errorDiv, el.fieldsContainer);
+        }
+
+        errorDiv.className = 'alert alert-danger mb-3';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> ${msg}`;
+        errorDiv.classList.remove('d-none');
+
+        setTimeout(() => {
+            if (errorDiv) errorDiv.classList.add('d-none');
+        }, 6000);
     }
 
     loadData();

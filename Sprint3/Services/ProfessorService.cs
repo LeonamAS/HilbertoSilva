@@ -5,6 +5,7 @@ using HilbertoSilva.Services.Interfaces;
 using HilbertoSilva.Models;
 using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Request.Update;
+using System.Text.RegularExpressions;
 
 namespace HilbertoSilva.Services;
 
@@ -34,8 +35,8 @@ public class ProfessorService : IProfessorService
     public async Task<ProfessorResponseDto?> ObterPorIdAsync(int id)
     {
         var professor = await _context.Professores
-        .Include(p => p.Usuario)
-        .FirstOrDefaultAsync(p => p.Id == id);
+            .Include(p => p.Usuario)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (professor == null)
             return null;
@@ -52,15 +53,24 @@ public class ProfessorService : IProfessorService
 
     public async Task<ProfessorResponseDto> CriarAsync(CreateProfessorComUsuarioDto dto)
     {
+        var cpfLimpo = ValidarELimparCpf(dto.Usuario.Cpf);
+        var cpfJaExiste = await _context.Usuarios.AnyAsync(u => u.Cpf == cpfLimpo);
+
+        if (cpfJaExiste)
+        {
+            throw new InvalidOperationException("O CPF informado já está cadastrado no sistema.");
+        }
+
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
             var novoUsuario = new Usuario
             {
-                Cpf = dto.Usuario.Cpf,
+                Cpf = cpfLimpo,
                 Senha = dto.Usuario.Senha,
-                TipoUsuario = dto.Usuario.TipoUsuario
+                TipoUsuario = dto.Usuario.TipoUsuario,
+                DataCadastro = DateTime.Now
             };
 
             _context.Set<Usuario>().Add(novoUsuario);
@@ -69,9 +79,9 @@ public class ProfessorService : IProfessorService
             var novoProfessor = new Professor
             {
                 FkUsuario = novoUsuario.Id,
-                Nome = dto.Professor.Nome,
-                Telefone = dto.Professor.Telefone,
-                Especialidade = dto.Professor.Especialidade
+                Nome = dto.Professor.Nome.Trim(),
+                Telefone = ManterApenasNumeros(dto.Professor.Telefone),
+                Especialidade = dto.Professor.Especialidade?.Trim()
             };
 
             _context.Set<Professor>().Add(novoProfessor);
@@ -101,9 +111,9 @@ public class ProfessorService : IProfessorService
         if (professor == null)
             return false;
 
-        professor.Nome = dto.Nome;
-        professor.Telefone = dto.Telefone;
-        professor.Especialidade = dto.Especialidade;
+        professor.Nome = dto.Nome.Trim();
+        professor.Telefone = ManterApenasNumeros(dto.Telefone);
+        professor.Especialidade = dto.Especialidade?.Trim();
 
         _context.Professores.Update(professor);
         await _context.SaveChangesAsync();
@@ -122,5 +132,26 @@ public class ProfessorService : IProfessorService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private string ValidarELimparCpf(string cpf)
+    {
+        if (string.IsNullOrWhiteSpace(cpf))
+            throw new ArgumentException("O CPF não pode ser vazio.");
+
+        var cpfNumeros = ManterApenasNumeros(cpf);
+
+        if (cpfNumeros.Length != 11)
+            throw new ArgumentException("O CPF está no formato incorreto. Ele deve conter exatamente 11 números.");
+
+        return cpfNumeros;
+    }
+
+    private string ManterApenasNumeros(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return string.Empty;
+
+        return Regex.Replace(valor, @"[^\d]", "");
     }
 }

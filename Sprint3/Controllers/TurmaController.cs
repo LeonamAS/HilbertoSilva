@@ -7,7 +7,7 @@ namespace HilbertoSilva.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "ADMIN")]
 public class TurmaController : ControllerBase
 {
     private readonly ITurmaService _turmaService;

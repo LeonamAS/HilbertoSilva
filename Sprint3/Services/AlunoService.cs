@@ -5,6 +5,7 @@ using HilbertoSilva.Services.Interfaces;
 using HilbertoSilva.Models;
 using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Request.Update;
+using System.Text.RegularExpressions;
 
 namespace HilbertoSilva.Services;
 
@@ -37,8 +38,8 @@ public class AlunoService : IAlunoService
     public async Task<AlunoResponseDto?> ObterPorIdAsync(int id)
     {
         var aluno = await _context.Alunos
-        .Include(a => a.Usuario)
-        .FirstOrDefaultAsync(a => a.Id == id);
+            .Include(a => a.Usuario)
+            .FirstOrDefaultAsync(a => a.Id == id);
 
         if (aluno == null)
             return null;
@@ -58,15 +59,25 @@ public class AlunoService : IAlunoService
 
     public async Task<AlunoResponseDto> CriarAsync(CreateAlunoComUsuarioDto dto)
     {
+        var cpfUsuarioLimpo = ValidarELimparCpf(dto.Usuario.Cpf, "Usuário");
+        var cpfResponsavelLimpo = ValidarELimparCpf(dto.Aluno.CpfResponsavel, "Responsável");
+
+        var cpfJaExiste = await _context.Usuarios.AnyAsync(u => u.Cpf == cpfUsuarioLimpo);
+        if (cpfJaExiste)
+        {
+            throw new InvalidOperationException("O CPF informado para o usuário já está cadastrado no sistema.");
+        }
+
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
             var novoUsuario = new Usuario
             {
-                Cpf = dto.Usuario.Cpf,
+                Cpf = cpfUsuarioLimpo,
                 Senha = dto.Usuario.Senha,
-                TipoUsuario = dto.Usuario.TipoUsuario
+                TipoUsuario = dto.Usuario.TipoUsuario,
+                DataCadastro = DateTime.Now
             };
 
             _context.Set<Usuario>().Add(novoUsuario);
@@ -76,12 +87,12 @@ public class AlunoService : IAlunoService
             {
                 FkUsuario = novoUsuario.Id,
                 FkTurma = dto.Aluno.TurmaId,
-                Nome = dto.Aluno.Nome,
+                Nome = dto.Aluno.Nome.Trim(),
                 DataNascimento = dto.Aluno.DataNascimento,
-                Matricula = dto.Aluno.Matricula,
-                NomeResponsavel = dto.Aluno.NomeResponsavel,
-                CpfResponsavel = dto.Aluno.CpfResponsavel,
-                TelefoneResponsavel = dto.Aluno.TelefoneResponsavel
+                Matricula = dto.Aluno.Matricula.Trim(),
+                NomeResponsavel = dto.Aluno.NomeResponsavel.Trim(),
+                CpfResponsavel = cpfResponsavelLimpo,
+                TelefoneResponsavel = ManterApenasNumeros(dto.Aluno.TelefoneResponsavel)
             };
 
             _context.Set<Aluno>().Add(novoAluno);
@@ -114,11 +125,13 @@ public class AlunoService : IAlunoService
         if (aluno == null)
             return false;
 
-        aluno.Nome = dto.Nome;
+        var cpfResponsavelLimpo = ValidarELimparCpf(dto.CpfResponsavel, "Responsável");
+
+        aluno.Nome = dto.Nome.Trim();
         aluno.DataNascimento = dto.DataNascimento;
-        aluno.NomeResponsavel = dto.NomeResponsavel;
-        aluno.TelefoneResponsavel = dto.TelefoneResponsavel;
-        aluno.CpfResponsavel = dto.CpfResponsavel;
+        aluno.NomeResponsavel = dto.NomeResponsavel.Trim();
+        aluno.TelefoneResponsavel = ManterApenasNumeros(dto.TelefoneResponsavel);
+        aluno.CpfResponsavel = cpfResponsavelLimpo;
 
         _context.Alunos.Update(aluno);
         await _context.SaveChangesAsync();
@@ -137,5 +150,26 @@ public class AlunoService : IAlunoService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private string ValidarELimparCpf(string cpf, string tipo)
+    {
+        if (string.IsNullOrWhiteSpace(cpf))
+            throw new ArgumentException($"O CPF do {tipo} não pode ser vazio.");
+
+        var cpfNumeros = ManterApenasNumeros(cpf);
+
+        if (cpfNumeros.Length != 11)
+            throw new ArgumentException($"O CPF do {tipo} está no formato incorreto. Ele deve conter exatamente 11 números.");
+
+        return cpfNumeros;
+    }
+
+    private string ManterApenasNumeros(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return string.Empty;
+
+        return Regex.Replace(valor, @"[^\d]", "");
     }
 }
