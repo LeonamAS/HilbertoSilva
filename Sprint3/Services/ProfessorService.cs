@@ -25,14 +25,17 @@ public class ProfessorService : IProfessorService
                 Id = p.Id,
                 Nome = p.Nome,
                 Telefone = p.Telefone,
-                Especialidade = p.Especialidade
+                Especialidade = p.Especialidade,
+                Cpf = p.Usuario != null ? p.Usuario.Cpf : string.Empty
             })
             .ToListAsync();
     }
 
     public async Task<ProfessorResponseDto?> ObterPorIdAsync(int id)
     {
-        var professor = await _context.Professores.FindAsync(id);
+        var professor = await _context.Professores
+        .Include(p => p.Usuario)
+        .FirstOrDefaultAsync(p => p.Id == id);
 
         if (professor == null)
             return null;
@@ -42,7 +45,8 @@ public class ProfessorService : IProfessorService
             Id = professor.Id,
             Nome = professor.Nome,
             Telefone = professor.Telefone,
-            Especialidade = professor.Especialidade
+            Especialidade = professor.Especialidade,
+            Cpf = professor.Usuario != null ? professor.Usuario.Cpf : string.Empty
         };
     }
 

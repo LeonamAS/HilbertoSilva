@@ -24,13 +24,15 @@ namespace HilbertoSilva.Services
                 .Select(b => new BoletimResponseDto
                 {
                     Id = b.Id,
+                    AlunoId = b.FkAluno,
                     NotaU1 = b.NotaU1,
                     NotaU2 = b.NotaU2,
                     NotaU3 = b.NotaU3,
                     Frequencia = b.Frequencia,
-
                     NomeAluno = b.Aluno.Nome,
-                    NomeDisciplina = b.DiarioClasse.Disciplina.Nome
+                    NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
+                    Matricula = b.Aluno.Matricula,
+                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma"
                 })
                 .ToListAsync();
         }
@@ -43,12 +45,15 @@ namespace HilbertoSilva.Services
                 .Select(b => new BoletimResponseDto
                 {
                     Id = b.Id,
+                    AlunoId = b.FkAluno,
                     NotaU1 = b.NotaU1,
                     NotaU2 = b.NotaU2,
                     NotaU3 = b.NotaU3,
                     Frequencia = b.Frequencia,
                     NomeAluno = b.Aluno.Nome,
-                    NomeDisciplina = b.DiarioClasse.Disciplina.Nome
+                    NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
+                    Matricula = b.Aluno.Matricula,
+                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma"
                 })
                 .FirstOrDefaultAsync();
         }

@@ -11,7 +11,8 @@
         idInput: document.getElementById('entityId'),
         modalTitle: document.getElementById('modalTitle'),
         alert: document.getElementById('alertFeedback'),
-        modal: new bootstrap.Modal(document.getElementById('formModal'))
+        modal: new bootstrap.Modal(document.getElementById('formModal')),
+        deleteModal: new bootstrap.Modal(document.getElementById('deleteConfirmModal'))
     };
 
     const config = {
@@ -19,10 +20,32 @@
             endpoint: '/api/alunos',
             title: 'Alunos',
             columns: [
-                { key: 'id', label: 'ID' },
                 { key: 'matricula', label: 'Matrícula' },
-                { key: 'nome', label: 'Nome do Aluno' },
-                { key: 'nomeResponsavel', label: 'Responsável' }
+                {
+                    key: 'nome',
+                    label: 'Nome do Aluno',
+                    format: (v, item) => `<a href="#" class="lnk-ver-boletim text-decoration-none fw-bold text-primary" data-id="${item.id}" data-nome="${item.nome}"><i class="fas fa-graduation-cap me-1"></i> ${v}</a>`
+                },
+                {
+                    key: 'cpf',
+                    label: 'CPF',
+                    format: v => v ? v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : '-'
+                },
+                { key: 'nomeResponsavel', label: 'Responsável' },
+                {
+                    key: 'telefoneResponsavel',
+                    label: 'Tel. Responsável',
+                    format: v => {
+                        if (!v) return '-';
+                        const num = v.replace(/\D/g, '');
+                        if (num.length === 11) {
+                            return num.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+                        } else if (num.length === 10) {
+                            return num.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+                        }
+                        return v;
+                    }
+                }
             ],
             formFields: [
                 { name: 'loginCpf', label: 'CPF de Login (Apenas números)', type: 'text', required: true, onlyCreate: true },
@@ -35,7 +58,6 @@
                 { name: 'cpfResponsavel', label: 'CPF do Responsável', type: 'text', required: true },
                 { name: 'telefoneResponsavel', label: 'Telefone do Responsável', type: 'text', required: true }
             ],
-
             buildPayload: (data, id) => id ? data : {
                 usuario: { cpf: data.loginCpf, senha: data.loginSenha, tipoUsuario: "Aluno" },
                 aluno: { ...data, turmaId: data.turmaId ? Number(data.turmaId) : null }
@@ -45,8 +67,12 @@
             endpoint: '/api/professor',
             title: 'Professores',
             columns: [
-                { key: 'id', label: 'ID' },
                 { key: 'nome', label: 'Nome do Professor' },
+                {
+                    key: 'cpf',
+                    label: 'CPF',
+                    format: v => v ? v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : '-'
+                },
                 { key: 'especialidade', label: 'Especialidade' },
                 { key: 'telefone', label: 'Telefone' }
             ],
@@ -66,7 +92,6 @@
             endpoint: '/api/disciplina',
             title: 'Disciplinas',
             columns: [
-                { key: 'id', label: 'ID' },
                 { key: 'nome', label: 'Nome da Disciplina' },
                 { key: 'cargaHoraria', label: 'Carga Horária (Horas)', format: v => `${v}h` }
             ],
@@ -79,8 +104,7 @@
             endpoint: '/api/turma',
             title: 'Turmas',
             columns: [
-                { key: 'id', label: 'ID' },
-                { key: 'nomeTurma', label: 'Nome' },
+                { key: 'nomeTurma', label: 'Nome', format: (v, item) => `<a href="#" class="lnk-ver-diario text-decoration-none fw-bold text-primary" data-id="${item.id}" data-nome="${item.nomeTurma}"><i class="fas fa-clipboard-list me-1"></i> ${v}</a>` },
                 { key: 'anoEscolar', label: 'Ano Escolar' },
                 { key: 'turno', label: 'Turno', format: v => String(v).toUpperCase().includes('VESPERTINO') || v == 1 ? 'Vespertino' : 'Matutino' }
             ],
@@ -96,12 +120,10 @@
             title: 'Diários de Classe',
             columns: [
                 { key: 'id', label: 'ID' },
-                { key: 'nomeTurma', label: 'Turma' },
                 { key: 'nomeDisciplina', label: 'Disciplina' },
                 { key: 'nomeProfessor', label: 'Professor Responsável' }
             ],
             formFields: [
-                // Opcional: No futuro você pode transformar esses inputs em 'select' buscando das APIs de turma/disciplina/professor
                 { name: 'turmaId', label: 'ID da Turma', type: 'number', required: true, onlyCreate: true },
                 { name: 'disciplinaId', label: 'ID da Disciplina', type: 'number', required: true, onlyCreate: true },
                 { name: 'professorId', label: 'ID do Professor Responsável', type: 'number', required: true }
@@ -111,12 +133,10 @@
             endpoint: '/api/boletim',
             title: 'Boletins',
             columns: [
-                { key: 'id', label: 'ID' },
-                { key: 'nomeAluno', label: 'Aluno' },
-                { key: 'nomeDisciplina', label: 'Disciplina/Matéria' },
-                { key: 'notaU1', label: 'U1', format: v => Number(v).toFixed(1) },
-                { key: 'notaU2', label: 'U2', format: v => Number(v).toFixed(1) },
-                { key: 'notaU3', label: 'U3', format: v => Number(v).toFixed(1) },
+                { key: 'nomeDisciplina', label: 'Disciplina' },
+                { key: 'notaU1', label: '1ª Unidade', format: v => Number(v).toFixed(1) },
+                { key: 'notaU2', label: '2ª Unidade', format: v => Number(v).toFixed(1) },
+                { key: 'notaU3', label: '3ª Unidade', format: v => Number(v).toFixed(1) },
                 { key: 'mediaFinal', label: 'Média Final', format: v => `<strong>${Number(v).toFixed(1)}</strong>` },
                 { key: 'frequencia', label: 'Frequência', format: v => `${Number(v).toFixed(0)}%` }
             ],
@@ -132,6 +152,13 @@
     };
 
     let currentEntity = 'alunos';
+
+    let activeAlunoFilter = null;
+    let activeAlunoNome = '';
+    let activeTurmaFilter = null;
+    let activeTurmaNome = '';
+    let itemToDeleteId = null;
+    let currentTableData = [];
 
     async function apiFetch(url, options = {}) {
         const response = await fetch(url, {
@@ -161,12 +188,59 @@
 
     async function loadData() {
         const conf = config[currentEntity];
-        el.pageTitle.textContent = `Gerenciar ${conf.title}`;
+
+        const oldBackBtnAluno = document.getElementById('btnVoltarAlunos');
+        if (oldBackBtnAluno) oldBackBtnAluno.remove();
+        const oldBackBtnTurma = document.getElementById('btnVoltarTurmas');
+        if (oldBackBtnTurma) oldBackBtnTurma.remove();
+
+        if (currentEntity === 'boletim' && activeAlunoFilter) {
+            el.pageTitle.innerHTML = `
+                <button class="btn btn-sm btn-outline-secondary me-3" id="btnVoltarAlunos">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button> 
+                Boletim: <span class="text-muted ms-1">${activeAlunoNome}</span>
+                <button class="btn btn-sm btn-outline-primary ms-3" id="btnPrintBoletim">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            `;
+
+            document.getElementById('btnVoltarAlunos').addEventListener('click', () => {
+                currentEntity = 'alunos';
+                activeAlunoFilter = null;
+                activeAlunoNome = '';
+                loadData();
+            });
+
+            document.getElementById('btnPrintBoletim').addEventListener('click', imprimirBoletim);
+        }
+        else if (currentEntity === 'diarioclasse' && activeTurmaFilter) {
+            el.pageTitle.innerHTML = `<button class="btn btn-sm btn-outline-secondary me-3" id="btnVoltarTurmas"><i class="fas fa-arrow-left"></i> Voltar</button> Diário de Classe: <span class="text-muted ms-1">${activeTurmaNome}</span>`;
+            document.getElementById('btnVoltarTurmas').addEventListener('click', () => {
+                currentEntity = 'turma';
+                activeTurmaFilter = null;
+                activeTurmaNome = '';
+                loadData();
+            });
+        }
+        else {
+            el.pageTitle.textContent = `Gerenciar ${conf.title}`;
+        }
+
         el.tableHead.innerHTML = `<tr>${conf.columns.map(c => `<th>${c.label}</th>`).join('')}<th class="text-end">Ações</th></tr>`;
         el.tableBody.innerHTML = '<tr><td colspan="100%" class="text-center">Carregando...</td></tr>';
 
         try {
-            const data = await apiFetch(conf.endpoint);
+            let data = await apiFetch(conf.endpoint);
+
+            if (currentEntity === 'boletim' && activeAlunoFilter) {
+                data = data.filter(b => b.alunoId == activeAlunoFilter);
+            }
+            else if (currentEntity === 'diarioclasse' && activeTurmaFilter) {
+                data = data.filter(d => d.turmaId == activeTurmaFilter);
+            }
+            currentTableData = data;
+
             if (!data?.length) {
                 el.tableBody.innerHTML = '<tr><td colspan="100%" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
                 return;
@@ -174,7 +248,7 @@
 
             el.tableBody.innerHTML = data.map(item => `
                 <tr>
-                    ${conf.columns.map(c => `<td>${c.format ? c.format(item[c.key]) : (item[c.key] ?? '-')}</td>`).join('')}
+                    ${conf.columns.map(c => `<td>${c.format ? c.format(item[c.key], item) : (item[c.key] ?? '-')}</td>`).join('')}
                     <td class="text-end">
                         <button class="btn btn-sm btn-outline-primary me-2 btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.id}"><i class="fas fa-trash"></i></button>
@@ -246,18 +320,34 @@
         }
     }
 
-    async function deleteItem(id) {
-        if (!confirm('Tem certeza que deseja excluir?')) return;
-        try {
-            await apiFetch(`${config[currentEntity].endpoint}/${id}`, { method: 'DELETE' });
-            exibirAlerta('Registro excluído!', 'success');
-            loadData();
-        } catch (error) {
-            exibirAlerta(`Falha: ${error.message}`, 'danger');
-        }
+    function deleteItem(id) {
+        itemToDeleteId = id;
+        el.deleteModal.show();
     }
 
     el.tableBody.addEventListener('click', (e) => {
+        const lnkBoletim = e.target.closest('.lnk-ver-boletim');
+        if (lnkBoletim) {
+            e.preventDefault();
+            activeAlunoFilter = lnkBoletim.dataset.id;
+            activeAlunoNome = lnkBoletim.dataset.nome;
+            currentEntity = 'boletim';
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            loadData();
+            return;
+        }
+
+        const lnkDiario = e.target.closest('.lnk-ver-diario');
+        if (lnkDiario) {
+            e.preventDefault();
+            activeTurmaFilter = lnkDiario.dataset.id;
+            activeTurmaNome = lnkDiario.dataset.nome;
+            currentEntity = 'diarioclasse';
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            loadData();
+            return;
+        }
+
         const btn = e.target.closest('button');
         if (!btn) return;
         const id = btn.dataset.id;
@@ -270,6 +360,22 @@
         el.idInput.value = '';
         el.modalTitle.textContent = `Adicionar Novo(a) ${config[currentEntity].title}`;
         buildForm(null);
+
+        if (currentEntity === 'boletim' && activeAlunoFilter) {
+            const fieldAluno = el.form.elements['alunoId'];
+            if (fieldAluno) {
+                fieldAluno.value = activeAlunoFilter;
+                fieldAluno.readOnly = true;
+            }
+        }
+        else if (currentEntity === 'diarioclasse' && activeTurmaFilter) {
+            const fieldTurma = el.form.elements['turmaId'];
+            if (fieldTurma) {
+                fieldTurma.value = activeTurmaFilter;
+                fieldTurma.readOnly = true;
+            }
+        }
+
         el.modal.show();
     });
 
@@ -306,6 +412,12 @@
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             e.currentTarget.classList.add('active');
             currentEntity = e.currentTarget.getAttribute('data-entity');
+
+            activeAlunoFilter = null;
+            activeAlunoNome = '';
+            activeTurmaFilter = null;
+            activeTurmaNome = '';
+
             loadData();
         });
     });
@@ -330,6 +442,114 @@
             icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
     });
+
+    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+        if (!itemToDeleteId) return;
+
+        try {
+            await apiFetch(`${config[currentEntity].endpoint}/${itemToDeleteId}`, { method: 'DELETE' });
+            el.deleteModal.hide();
+            exibirAlerta('Registro excluído com sucesso!', 'success');
+            loadData();
+        } catch (error) {
+            el.deleteModal.hide();
+            exibirAlerta(`Falha ao excluir: ${error.message}`, 'danger');
+        } finally {
+            itemToDeleteId = null;
+        }
+    });
+
+    function imprimirBoletim() {
+        if (!currentTableData || currentTableData.length === 0) {
+            exibirAlerta('Não há dados para imprimir neste boletim.', 'warning');
+            return;
+        }
+
+        const info = currentTableData[0];
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+        const linhasTabela = currentTableData.map(b => `
+            <tr>
+                <td>${b.nomeDisciplina}</td>
+                <td class="text-center">${Number(b.notaU1).toFixed(1)}</td>
+                <td class="text-center">${Number(b.notaU2).toFixed(1)}</td>
+                <td class="text-center">${Number(b.notaU3).toFixed(1)}</td>
+                <td class="text-center fw-bold">${Number(b.mediaFinal).toFixed(1)}</td>
+                <td class="text-center">${Number(b.frequencia).toFixed(0)}%</td>
+            </tr>
+        `).join('');
+
+        const htmlImpressao = `
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <title>Boletim - ${info.nomeAluno}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
+                    .header { text-align: center; border-bottom: 2px solid #54a790; padding-bottom: 15px; margin-bottom: 25px; }
+                    .header h1 { margin: 0; color: #2E4D68; font-size: 24px; text-transform: uppercase; }
+                    .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+                    .aluno-info { margin-bottom: 30px; padding: 15px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; }
+                    .aluno-info p { margin: 5px 0; font-size: 14px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                    th { background-color: #54a790; color: white; padding: 10px; text-align: left; }
+                    td { border: 1px solid #ddd; padding: 10px; }
+                    th.text-center, td.text-center { text-align: center; }
+                    .fw-bold { font-weight: bold; }
+                    .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+                    @media print {
+                        body { padding: 0; }
+                        .aluno-info { background-color: transparent; }
+                        th { background-color: #54a790 !important; color: white !important; -webkit-print-color-adjust: exact; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Escola Municipal Hilberto Silva</h1>
+                    <h3>Boletim Escolar</h3>
+                    <p>Documento emitido em ${dataAtual}</p>
+                </div>
+                
+                <div class="aluno-info">
+                    <p><strong>Aluno(a):</strong> ${info.nomeAluno}</p>
+                    <p><strong>Matrícula:</strong> ${info.matricula || 'N/A'}</p>
+                    <p><strong>Turma:</strong> ${info.nomeTurma || 'N/A'}</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Disciplina</th>
+                            <th class="text-center">Nota U1</th>
+                            <th class="text-center">Nota U2</th>
+                            <th class="text-center">Nota U3</th>
+                            <th class="text-center">Média Final</th>
+                            <th class="text-center">Frequência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <p>Este documento é um resumo de notas e frequência. Em caso de divergência, procure a secretaria.</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        const janelaImpressao = window.open('', '_blank');
+        janelaImpressao.document.write(htmlImpressao);
+        janelaImpressao.document.close();
+
+        setTimeout(() => {
+            janelaImpressao.print();
+            janelaImpressao.close();
+        }, 250);
+    }
 
     loadData();
 });
