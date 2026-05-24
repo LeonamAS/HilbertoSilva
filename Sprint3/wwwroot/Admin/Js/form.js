@@ -7,8 +7,23 @@ import { loadData } from './table.js';
 export async function carregarDropdownsDinamicos() {
     const conf = config[state.currentEntity];
 
+    for (const field of conf.formFields) {
+        if (field.optionsEndpoint) {
+            try {
+                const data = await apiFetch(field.optionsEndpoint);
+
+                field.options = data.map(item => ({
+                    value: item[field.optionValue],
+                    label: item[field.optionLabel]
+                }));
+            } catch (error) {
+                console.error(`Falha ao carregar dados do endpoint ${field.optionsEndpoint}:`, error);
+            }
+        }
+    }
+
     const turmaField = conf.formFields.find(f => f.name === 'turmaId');
-    if (turmaField) {
+    if (turmaField && (!turmaField.optionsEndpoint)) {
         try {
             const turmas = await apiFetch('/api/turma');
             turmaField.options = turmas.map(t => {
@@ -60,7 +75,7 @@ export function buildForm(id = null) {
                 inputHtml = `
                     <select class="form-select" name="${f.name}" ${f.required ? 'required' : ''}>
                         <option value="" disabled selected>Selecione...</option>
-                        ${f.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
+                        ${(f.options || []).map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
                     </select>`;
             }
             else if (f.type === 'password') {
@@ -94,6 +109,7 @@ export function setupFormEvents() {
         state.el.modalTitle.textContent = `Adicionar Novo(a) ${config[state.currentEntity].title}`;
 
         await carregarDropdownsDinamicos();
+
         buildForm(null);
 
         if (state.currentEntity === 'boletim' && state.activeAlunoFilter) {
@@ -106,7 +122,9 @@ export function setupFormEvents() {
             const fieldTurma = state.el.form.elements['turmaId'];
             if (fieldTurma) {
                 fieldTurma.value = state.activeTurmaFilter;
-                fieldTurma.readOnly = true;
+
+                fieldTurma.style.pointerEvents = 'none';
+                fieldTurma.style.backgroundColor = '#e9ecef';
             }
         }
 
@@ -122,8 +140,12 @@ export function setupFormEvents() {
 
         if (rawData.loginCpf) rawData.loginCpf = rawData.loginCpf.replace(/\D/g, '');
         if (rawData.cpfResponsavel) rawData.cpfResponsavel = rawData.cpfResponsavel.replace(/\D/g, '');
+
         if (rawData.telefoneResponsavel) {
             rawData.telefoneResponsavel = rawData.telefoneResponsavel.replace(/\D/g, '');
+        }
+        if (rawData.telefone) {
+            rawData.telefone = rawData.telefone.replace(/\D/g, '');
         }
 
         if (state.currentEntity === 'alunos') {

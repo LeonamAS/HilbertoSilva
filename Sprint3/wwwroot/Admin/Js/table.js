@@ -158,15 +158,15 @@ export function setupTableEvents() {
 }
 
 function imprimirBoletim() {
-    if (!currentTableData || currentTableData.length === 0) {
+    if (!state.currentTableData || state.currentTableData.length === 0) {
         exibirAlerta('Não há dados para imprimir neste boletim.', 'warning');
         return;
     }
 
-    const info = currentTableData[0];
+    const info = state.currentTableData[0];
     const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-    const linhasTabela = currentTableData.map(b => {
+    const linhasTabela = state.currentTableData.map(b => {
         const corU1 = Number(b.notaU1) < 6 ? 'text-danger' : '';
         const corU2 = Number(b.notaU2) < 6 ? 'text-danger' : '';
         const corU3 = Number(b.notaU3) < 6 ? 'text-danger' : '';
@@ -190,7 +190,7 @@ function imprimirBoletim() {
             <html lang="pt-BR">
             <head>
                 <meta charset="UTF-8">
-                <title>Boletim - ${info.nomeAluno}</title>
+                <title>Boletim - ${info.nomeAluno || state.activeAlunoNome}</title>
                 <style>
                     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
                     .header { text-align: center; border-bottom: 2px solid #54a790; padding-bottom: 15px; margin-bottom: 25px; }
@@ -220,9 +220,11 @@ function imprimirBoletim() {
                 </div>
                 
                 <div class="aluno-info">
-                    <p><strong>Aluno(a):</strong> ${info.nomeAluno}</p>
+                    <p><strong>Aluno(a):</strong> ${info.nomeAluno || state.activeAlunoNome}</p>
                     <p><strong>Matrícula:</strong> ${info.matricula || 'N/A'}</p>
+                    <p><strong>Ano Escolar:</strong> ${info.anoEscolar || 'N/A'}</p>
                     <p><strong>Turma:</strong> ${info.nomeTurma || 'N/A'}</p>
+                    <p><strong>Ano Letivo:</strong> ${info.anoLetivo || 'N/A'}</p>
                 </div>
 
                 <table>

@@ -24,6 +24,7 @@ public class AlunoService : IAlunoService
             .Select(aluno => new AlunoResponseDto
             {
                 Id = aluno.Id,
+                TurmaId = aluno.FkTurma,
                 Nome = aluno.Nome,
                 Matricula = aluno.Matricula,
                 DataNascimento = aluno.DataNascimento,
@@ -47,6 +48,7 @@ public class AlunoService : IAlunoService
         return new AlunoResponseDto
         {
             Id = aluno.Id,
+            TurmaId = aluno.FkTurma,
             Nome = aluno.Nome,
             Matricula = aluno.Matricula,
             DataNascimento = aluno.DataNascimento,
@@ -126,6 +128,7 @@ public class AlunoService : IAlunoService
             return new AlunoResponseDto
             {
                 Id = novoAluno.Id,
+                TurmaId = novoAluno.FkTurma,
                 Nome = novoAluno.Nome,
                 DataNascimento = novoAluno.DataNascimento,
                 Matricula = novoAluno.Matricula,

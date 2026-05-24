@@ -99,7 +99,7 @@ export const config = {
             { key: 'turno', label: 'Turno', format: v => String(v).toUpperCase().includes('VESPERTINO') || v == 1 ? 'Vespertino' : 'Matutino' }
         ],
         formFields: [
-            { name: 'nomeTurma', label: 'Nome da Turma', type: 'text', required: true },
+            { name: 'nomeTurma', label: 'Nome da Turma (Ex: 6A)', type: 'text', required: true },
             { name: 'anoEscolar', label: 'Ano Escolar', type: 'text', required: true },
             { name: 'anoLetivo', label: 'Ano Letivo', type: 'number', required: true },
             { name: 'turno', label: 'Turno', type: 'select', required: true, options: [{ value: '0', label: 'Matutino' }, { value: '1', label: 'Vespertino' }] }
@@ -113,9 +113,9 @@ export const config = {
             { key: 'nomeProfessor', label: 'Professor Responsável' }
         ],
         formFields: [
-            { name: 'turmaId', label: 'ID da Turma', type: 'number', required: true, onlyCreate: true },
-            { name: 'disciplinaId', label: 'ID da Disciplina', type: 'number', required: true, onlyCreate: true },
-            { name: 'professorId', label: 'ID do Professor Responsável', type: 'number', required: true }
+            { name: 'turmaId', label: 'Turma', type: 'select', required: true, optionsEndpoint: '/api/Turma', optionValue: 'id', optionLabel: 'nomeTurma' },
+            { name: 'disciplinaId', label: 'Disciplina', type: 'select', required: true, optionsEndpoint: '/api/Disciplina', optionValue: 'id', optionLabel: 'nome' },
+            { name: 'professorId', label: 'Professor Responsável', type: 'select', required: true, optionsEndpoint: '/api/Professor', optionValue: 'id', optionLabel: 'nome' }
         ]
     },
     boletim: {
@@ -131,7 +131,7 @@ export const config = {
         ],
         formFields: [
             { name: 'alunoNomeDisplay', label: 'Aluno', type: 'text', disabled: true, onlyCreate: true },
-            { name: 'turmaDisciplinaId', label: 'Diário de Classe (Disciplina)', type: 'select', required: true, options: [], onlyCreate: true },
+            { name: 'turmaDisciplinaId', label: 'Disciplina', type: 'select', required: true, options: [], onlyCreate: true },
             { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', required: true, step: '0.1' },
             { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', required: true, step: '0.1' },
             { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', required: true, step: '0.1' },

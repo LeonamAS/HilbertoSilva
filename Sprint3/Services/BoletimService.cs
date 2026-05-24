@@ -32,7 +32,9 @@ namespace HilbertoSilva.Services
                     NomeAluno = b.Aluno.Nome,
                     NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
                     Matricula = b.Aluno.Matricula,
-                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma"
+                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma",
+                    AnoEscolar = b.DiarioClasse.Turma.AnoEscolar,
+                    AnoLetivo = b.DiarioClasse.Turma.AnoLetivo
                 })
                 .ToListAsync();
         }
@@ -53,7 +55,9 @@ namespace HilbertoSilva.Services
                     NomeAluno = b.Aluno.Nome,
                     NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
                     Matricula = b.Aluno.Matricula,
-                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma"
+                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma",
+                    AnoEscolar = b.DiarioClasse.Turma.AnoEscolar,
+                    AnoLetivo = b.DiarioClasse.Turma.AnoLetivo
                 })
                 .FirstOrDefaultAsync();
         }

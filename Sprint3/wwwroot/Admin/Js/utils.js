@@ -22,6 +22,12 @@ export function exibirErroFormulario(msg) {
 
 export function setupMasks() {
     document.addEventListener('input', (e) => {
+        const camposSemNumeros = ['nome', 'nomeResponsavel', 'nomeProfessor', 'alunoNomeDisplay', 'especialidade'];
+
+        if (camposSemNumeros.includes(e.target.name)) {
+            e.target.value = e.target.value.replace(/\d/g, '');
+        }
+
         if (e.target.name === 'loginCpf' || e.target.name === 'cpfResponsavel') {
             let value = e.target.value.replace(/\D/g, '');
 
@@ -37,7 +43,7 @@ export function setupMasks() {
 
             e.target.value = value;
         }
-        if (e.target.name === 'telefoneResponsavel') {
+        if (e.target.name === 'telefoneResponsavel' || e.target.name === 'telefone') {
             let value = e.target.value.replace(/\D/g, '');
 
             if (value.length > 11) value = value.slice(0, 11);

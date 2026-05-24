@@ -16,4 +16,8 @@ public class BoletimResponseDto
 
     // Calcula a média final
     public decimal MediaFinal => (NotaU1 + NotaU2 + NotaU3) / 3;
+
+    //Para a impressão do boletim
+    public string AnoEscolar { get; set; }
+    public int AnoLetivo { get; set; }
 }
