@@ -4,7 +4,8 @@ namespace HilbertoSilva.DTOs.Request.Create;
 
 public class CreateAlunoDto
 {
-    public int? TurmaId { get; set; }
+    [Required(ErrorMessage = "A identificação da turma é obrigatória.")]
+    public int TurmaId { get; set; }
 
     [Required(ErrorMessage = "O nome do aluno é obrigatório.")]
     [StringLength(255, ErrorMessage = "O nome do aluno não pode ultrapassar 255 caracteres.")]
@@ -13,9 +14,7 @@ public class CreateAlunoDto
     [Required(ErrorMessage = "A data de nascimento é obrigatória.")]
     public DateTime DataNascimento { get; set; }
 
-    [Required(ErrorMessage = "A matrícula do aluno é obrigatória.")]
-    [StringLength(50, ErrorMessage = "A matrícula não pode ultrapassar 50 caracteres.")]
-    public string Matricula { get; set; }
+    public string? Matricula { get; set; }
 
     [Required(ErrorMessage = "O nome do responsável é obrigatório.")]
     [StringLength(255, ErrorMessage = "O nome não pode ultrapassar 255 caracteres.")]

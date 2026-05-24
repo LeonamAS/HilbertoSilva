@@ -83,13 +83,36 @@ public class AlunoService : IAlunoService
             _context.Set<Usuario>().Add(novoUsuario);
             await _context.SaveChangesAsync();
 
+            int anoAtual = DateTime.Now.Year;
+            string prefixoMatricula = $"MAT{anoAtual}-";
+
+            var ultimaMatricula = await _context.Alunos
+                .Where(a => a.Matricula.StartsWith(prefixoMatricula))
+                .OrderByDescending(a => a.Matricula)
+                .Select(a => a.Matricula)
+                .FirstOrDefaultAsync();
+
+            int proximoNumero = 1;
+
+            if (!string.IsNullOrEmpty(ultimaMatricula))
+            {
+                string sufixoNumero = ultimaMatricula.Substring(prefixoMatricula.Length);
+
+                if (int.TryParse(sufixoNumero, out int ultimoNumeroConvertido))
+                {
+                    proximoNumero = ultimoNumeroConvertido + 1;
+                }
+            }
+
+            string novaMatriculaGerada = $"{prefixoMatricula}{proximoNumero:D3}";
+
             var novoAluno = new Aluno
             {
                 FkUsuario = novoUsuario.Id,
                 FkTurma = dto.Aluno.TurmaId,
                 Nome = dto.Aluno.Nome.Trim(),
                 DataNascimento = dto.Aluno.DataNascimento,
-                Matricula = dto.Aluno.Matricula.Trim(),
+                Matricula = novaMatriculaGerada,
                 NomeResponsavel = dto.Aluno.NomeResponsavel.Trim(),
                 CpfResponsavel = cpfResponsavelLimpo,
                 TelefoneResponsavel = ManterApenasNumeros(dto.Aluno.TelefoneResponsavel)
@@ -132,6 +155,7 @@ public class AlunoService : IAlunoService
         aluno.NomeResponsavel = dto.NomeResponsavel.Trim();
         aluno.TelefoneResponsavel = ManterApenasNumeros(dto.TelefoneResponsavel);
         aluno.CpfResponsavel = cpfResponsavelLimpo;
+        aluno.FkTurma = dto.TurmaId;
 
         _context.Alunos.Update(aluno);
         await _context.SaveChangesAsync();

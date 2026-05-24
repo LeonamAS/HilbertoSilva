@@ -4,7 +4,8 @@ namespace HilbertoSilva.DTOs.Request.Update;
 
 public class UpdateAlunoDto
 {
-    public int? TurmaId { get; set; }
+    [Required(ErrorMessage = "A identificação da turma é obrigatória.")]
+    public int TurmaId { get; set; }
 
     [Required(ErrorMessage = "O nome do aluno é obrigatório.")]
     [StringLength(255)]
