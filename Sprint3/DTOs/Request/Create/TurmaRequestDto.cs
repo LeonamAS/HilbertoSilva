@@ -10,7 +10,7 @@ public class TurmaRequestDto
     public string NomeTurma { get; set; }
 
     [Required(ErrorMessage = "O ano escolar é obrigatório.")]
-    public string AnoEscolar { get; set; }
+    public AnoEscolar AnoEscolar { get; set; }
 
     [Required(ErrorMessage = "O ano letivo é obrigatório.")]
     public int AnoLetivo { get; set; }

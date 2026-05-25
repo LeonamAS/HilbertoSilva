@@ -94,13 +94,44 @@ export const config = {
         endpoint: '/api/turma',
         title: 'Turmas',
         columns: [
-            { key: 'nomeTurma', label: 'Nome', format: (v, item) => `<a href="#" class="lnk-ver-diario text-decoration-none fw-bold text-primary" data-id="${item.id}" data-nome="${item.nomeTurma}"><i class="fas fa-clipboard-list me-1"></i> ${v}</a>` },
-            { key: 'anoEscolar', label: 'Ano Escolar' },
-            { key: 'turno', label: 'Turno', format: v => String(v).toUpperCase().includes('VESPERTINO') || v == 1 ? 'Vespertino' : 'Matutino' }
+            {
+                key: 'nomeTurma',
+                label: 'Nome',
+                format: (v, item) => `<a href="#" class="lnk-ver-diario text-decoration-none fw-bold text-primary" data-id="${item.id}" data-nome="${item.nomeTurma}"><i class="fas fa-clipboard-list me-1"></i> ${v}</a>`
+            },
+            {
+                key: 'anoEscolar',
+                label: 'Ano Escolar',
+                format: v => {
+                    const mapaAno = {
+                        "6": "6º ANO", "SextoAno": "6º ANO",
+                        "7": "7º ANO", "SetimoAno": "7º ANO",
+                        "8": "8º ANO", "OitavoAno": "8º ANO",
+                        "9": "9º ANO", "NonoAno": "9º ANO"
+                    };
+                    return mapaAno[v] || v;
+                }
+            },
+            {
+                key: 'turno',
+                label: 'Turno',
+                format: v => String(v).toUpperCase().includes('VESPERTINO') || v == 1 ? 'Vespertino' : 'Matutino'
+            }
         ],
         formFields: [
             { name: 'nomeTurma', label: 'Nome da Turma (Ex: 6A)', type: 'text', required: true },
-            { name: 'anoEscolar', label: 'Ano Escolar', type: 'text', required: true },
+            {
+                name: 'anoEscolar',
+                label: 'Ano Escolar',
+                type: 'select',
+                required: true,
+                options: [
+                    { value: '6', label: '6º ANO' },
+                    { value: '7', label: '7º ANO' },
+                    { value: '8', label: '8º ANO' },
+                    { value: '9', label: '9º ANO' }
+                ]
+            },
             { name: 'anoLetivo', label: 'Ano Letivo', type: 'number', required: true },
             { name: 'turno', label: 'Turno', type: 'select', required: true, options: [{ value: '0', label: 'Matutino' }, { value: '1', label: 'Vespertino' }] }
         ]

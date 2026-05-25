@@ -1,0 +1,417 @@
+USE em_hilberto_silva;
+
+-- ADMINISTRADOR
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES
+('Admin', '123456', 'ADMIN', '2026-05-19');
+
+-- DISCIPLINAS
+INSERT INTO disciplinas (nome, carga_horaria) VALUES
+('Língua Portuguesa', 170),
+('Matemática', 170),
+('Ciências', 100),
+('História', 70),
+('Geografia', 70),
+('Educação Física', 70),
+('Artes', 70),
+('Ensino Religioso', 30),
+('Língua Estrangeira', 70),
+('Optativa', 30);
+
+-- TURMAS
+INSERT INTO turmas (nome_turma, ano_escolar, ano_letivo, turno) VALUES
+('6A', 6, 2026, 0),
+('7A', 7, 2026, 0),
+('8A', 8, 2026, 0),
+('9A', 9, 2026, 0),
+('6B', 6, 2026, 1);
+
+-- USUÁRIOS => PROFESSORES
+START TRANSACTION;
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('11111111111', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_portugues = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_portugues, 'Ana Costa', '71988880001', 'Língua Portuguesa');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('22222222222', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_matematica = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_matematica, 'Bruno Silva', '71988880002', 'Matemática');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('33333333333', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_ciencias = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_ciencias, 'Carlos Souza', '71988880003', 'Ciências');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('44444444444', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_historia = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_historia, 'Daniela Oliveira', '71988880004', 'História');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('55555555555', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_geografia = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_geografia, 'Eduardo Santos', '71988880005', 'Geografia');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('66666666666', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_ed_fisica = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_ed_fisica, 'Fernanda Lima', '71988880006', 'Educação Física');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('77777777777', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_artes = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_artes, 'Gustavo Mendes', '71988880007', 'Artes');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('88888888888', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_religioso = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_religioso, 'Helena Pereira', '71988880008', 'Ensino Religioso');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('99999999999', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_estrangeira = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_estrangeira, 'Igor Rocha', '71988880009', 'Língua Estrangeira');
+
+-- ==========================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
+VALUES ('10101010101', 'Professor@123', 'PROFESSOR', NOW(6));
+
+SET @id_optativa = LAST_INSERT_ID();
+
+INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
+VALUES (@id_optativa, 'Juliana Martins', '71988880010', 'Optativa');
+
+-- Confirmando todas as inserções no banco
+COMMIT;
+
+-- USUÁRIOS => ALUNOS
+START TRANSACTION;
+
+-- ====================================================================
+-- CAPTURANDO OS IDs DAS TURMAS 
+-- ====================================================================
+SET @turma_6m = (SELECT turma_id FROM turmas WHERE ano_escolar = 6 AND turno = 0 LIMIT 1);
+SET @turma_6v = (SELECT turma_id FROM turmas WHERE ano_escolar = 6 AND turno = 1 LIMIT 1);
+SET @turma_7m = (SELECT turma_id FROM turmas WHERE ano_escolar = 7 AND turno = 0 LIMIT 1);
+SET @turma_8m = (SELECT turma_id FROM turmas WHERE ano_escolar = 8 AND turno = 0 LIMIT 1);
+SET @turma_9m = (SELECT turma_id FROM turmas WHERE ano_escolar = 9 AND turno = 0 LIMIT 1);
+
+-- ====================================================================
+-- TURMA 1: 6º ANO - MATUTINO
+-- ====================================================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110001', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Lucas Almeida Santos', '2014-01-01', 'MAT2026-001', 'Ricardo Almeida Santos', '22222220001', '71900000001');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110002', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Mariana Costa Silva', '2014-01-02', 'MAT2026-002', 'Juliana Costa Silva', '22222220002', '71900000002');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110003', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'João Pedro Fernandes', '2014-01-03', 'MAT2026-003', 'Marcos Fernandes', '22222220003', '71900000003');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110004', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Beatriz Lima Sousa', '2014-01-04', 'MAT2026-004', 'Camila Lima Sousa', '22222220004', '71900000004');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110005', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Pedro Henrique Rocha', '2014-01-05', 'MAT2026-005', 'Sandro Rocha', '22222220005', '71900000005');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110006', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Ana Clara Ribeiro', '2014-01-06', 'MAT2026-006', 'Fernanda Ribeiro', '22222220006', '71900000006');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110007', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Gabriel Martins Alves', '2014-01-07', 'MAT2026-007', 'Roberto Martins Alves', '22222220007', '71900000007');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110008', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Julia Ferreira Gomes', '2014-01-08', 'MAT2026-008', 'Tatiana Ferreira Gomes', '22222220008', '71900000008');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110009', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Felipe Pereira Barbosa', '2014-01-09', 'MAT2026-009', 'Eduardo Pereira Barbosa', '22222220009', '71900000009');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110010', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6m, 'Laura Melo Carvalho', '2014-01-10', 'MAT2026-010', 'Renata Melo Carvalho', '22222220010', '71900000010');
+
+-- ====================================================================
+-- TURMA 2: 6º ANO - VESPERTINO
+-- ====================================================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110011', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Mateus Castro Nunes', '2014-02-01', 'MAT2026-011', 'Sérgio Castro Nunes', '22222220011', '71900000011');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110012', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Sofia Mendes Pinto', '2014-02-02', 'MAT2026-012', 'Luciana Mendes Pinto', '22222220012', '71900000012');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110013', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Rafael Dias Moraes', '2014-02-03', 'MAT2026-013', 'Paulo Dias Moraes', '22222220013', '71900000013');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110014', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Isabella Correia Vieira', '2014-02-04', 'MAT2026-014', 'Cláudia Correia Vieira', '22222220014', '71900000014');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110015', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Guilherme Silva Monteiro', '2014-02-05', 'MAT2026-015', 'Fábio Silva Monteiro', '22222220015', '71900000015');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110016', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Manuela Barros Teixeira', '2014-02-06', 'MAT2026-016', 'Patrícia Barros Teixeira', '22222220016', '71900000016');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110017', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Gustavo Campos Moura', '2014-02-07', 'MAT2026-017', 'Marcelo Campos Moura', '22222220017', '71900000017');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110018', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Luiza Cavalcanti', '2014-02-08', 'MAT2026-018', 'Andréa Cavalcanti', '22222220018', '71900000018');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110019', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Thiago Assis Maciel', '2014-02-09', 'MAT2026-019', 'Rodrigo Assis Maciel', '22222220019', '71900000019');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110020', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_6v, 'Giovanna Nogueira Lima', '2014-02-10', 'MAT2026-020', 'Simone Nogueira Lima', '22222220020', '71900000020');
+
+-- ====================================================================
+-- TURMA 3: 7º ANO - MATUTINO
+-- ====================================================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110021', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Arthur Viana Machado', '2013-03-01', 'MAT2026-021', 'Fernando Viana Machado', '22222220021', '71900000021');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110022', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Maria Eduarda Brito', '2013-03-02', 'MAT2026-022', 'Adriana Brito', '22222220022', '71900000022');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110023', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Davi Borges Peixoto', '2013-03-03', 'MAT2026-023', 'Thiago Borges Peixoto', '22222220023', '71900000023');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110024', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Alice Pires Dantas', '2013-03-04', 'MAT2026-024', 'Aline Pires Dantas', '22222220024', '71900000024');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110025', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Enzo Duarte Guedes', '2013-03-05', 'MAT2026-025', 'Márcio Duarte Guedes', '22222220025', '71900000025');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110026', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Valentina Aguiar Sales', '2013-03-06', 'MAT2026-026', 'Cristiane Aguiar Sales', '22222220026', '71900000026');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110027', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Bernardo Leal Sampaio', '2013-03-07', 'MAT2026-027', 'Ronaldo Leal Sampaio', '22222220027', '71900000027');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110028', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Helena Macedo Cruz', '2013-03-08', 'MAT2026-028', 'Mônica Macedo Cruz', '22222220028', '71900000028');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110029', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Cauã Neves Freitas', '2013-03-09', 'MAT2026-029', 'Leandro Neves Freitas', '22222220029', '71900000029');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110030', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_7m, 'Sophia Ramos Rangel', '2013-03-10', 'MAT2026-030', 'Letícia Ramos Rangel', '22222220030', '71900000030');
+
+-- ====================================================================
+-- TURMA 4: 8º ANO - MATUTINO
+-- ====================================================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110031', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Samuel Pacheco', '2012-04-01', 'MAT2026-031', 'Gilberto Pacheco', '22222220031', '71900000031');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110032', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Lívia Morais Telles', '2012-04-02', 'MAT2026-032', 'Sônia Morais Telles', '22222220032', '71900000032');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110033', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Miguel Assis Lemos', '2012-04-03', 'MAT2026-033', 'Valdir Assis Lemos', '22222220033', '71900000033');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110034', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Lorena Fogaça Diniz', '2012-04-04', 'MAT2026-034', 'Miriam Fogaça Diniz', '22222220034', '71900000034');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110035', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Diego Siqueira Lira', '2012-04-05', 'MAT2026-035', 'Osvaldo Siqueira Lira', '22222220035', '71900000035');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110036', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Clara Meireles Bessa', '2012-04-06', 'MAT2026-036', 'Gisele Meireles Bessa', '22222220036', '71900000036');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110037', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Henrique Fontes Prado', '2012-04-07', 'MAT2026-037', 'Vagner Fontes Prado', '22222220037', '71900000037');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110038', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Isadora Muniz Rios', '2012-04-08', 'MAT2026-038', 'Tânia Muniz Rios', '22222220038', '71900000038');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110039', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Vitor Gusmão Fialho', '2012-04-09', 'MAT2026-039', 'Rui Gusmão Fialho', '22222220039', '71900000039');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110040', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_8m, 'Letícia Albuquerque', '2012-04-10', 'MAT2026-040', 'Eliane Albuquerque', '22222220040', '71900000040');
+
+-- ====================================================================
+-- TURMA 5: 9º ANO - MATUTINO
+-- ====================================================================
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110041', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Leonardo Pimenta', '2011-05-01', 'MAT2026-041', 'Carlos Pimenta', '22222220041', '71900000041');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110042', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Amanda Lovato Jesus', '2011-05-02', 'MAT2026-042', 'Silvana Lovato Jesus', '22222220042', '71900000042');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110043', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Eduardo Gouveia', '2011-05-03', 'MAT2026-043', 'Edson Gouveia', '22222220043', '71900000043');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110044', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Melissa Arantes', '2011-05-04', 'MAT2026-044', 'Célia Arantes', '22222220044', '71900000044');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110045', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Bruno Salgado Lins', '2011-05-05', 'MAT2026-045', 'Daniel Salgado Lins', '22222220045', '71900000045');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110046', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Yasmin Franco Lacerda', '2011-05-06', 'MAT2026-046', 'Kátia Franco Lacerda', '22222220046', '71900000046');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110047', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Rodrigo Rezende', '2011-05-07', 'MAT2026-047', 'Alexandre Rezende', '22222220047', '71900000047');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110048', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Gabriela Antunes', '2011-05-08', 'MAT2026-048', 'Marcia Antunes', '22222220048', '71900000048');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110049', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Marcelo Peçanha', '2011-05-09', 'MAT2026-049', 'Flávio Peçanha', '22222220049', '71900000049');
+
+INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) VALUES ('11111110050', 'Aluno@123', 'ALUNO', NOW(6));
+INSERT INTO alunos (fk_usuario, fk_turma, nome, data_nascimento, matricula, nome_responsavel, cpf_responsavel, telefone_responsavel) 
+VALUES (LAST_INSERT_ID(), @turma_9m, 'Carolina Xavier', '2011-05-10', 'MAT2026-050', 'Vera Xavier', '22222220050', '71900000050');
+
+-- Confirmando a transação
+COMMIT;
+
+-- DIÁRIO DE CLASSE
+START TRANSACTION;
+
+INSERT INTO diarioclasse (fk_turma, fk_professor, fk_disciplina)
+SELECT 
+    t.turma_id, 
+    p.professor_id, 
+    d.disciplina_id
+FROM turmas t
+CROSS JOIN professores p
+INNER JOIN disciplinas d ON p.especialidade = d.nome;
+
+COMMIT;
+
+-- BOLETINS
+START TRANSACTION;
+
+INSERT INTO boletins (fk_aluno, fk_turma_disciplina, nota_u1, nota_u2, nota_u3, frequencia)
+SELECT 
+    (SELECT aluno_id FROM alunos WHERE matricula = 'MAT2026-001' LIMIT 1),
+    turma_disciplina_id,
+    8.50, 7.50, 9.00, 95.00
+FROM diarioclasse
+WHERE fk_turma = (SELECT fk_turma FROM alunos WHERE matricula = 'MAT2026-001' LIMIT 1);
+
+-- ====================================================================
+INSERT INTO boletins (fk_aluno, fk_turma_disciplina, nota_u1, nota_u2, nota_u3, frequencia)
+SELECT 
+    (SELECT aluno_id FROM alunos WHERE matricula = 'MAT2026-011' LIMIT 1),
+    turma_disciplina_id,
+    7.00, 8.00, 8.50, 90.00
+FROM diarioclasse
+WHERE fk_turma = (SELECT fk_turma FROM alunos WHERE matricula = 'MAT2026-011' LIMIT 1);
+
+-- ====================================================================
+INSERT INTO boletins (fk_aluno, fk_turma_disciplina, nota_u1, nota_u2, nota_u3, frequencia)
+SELECT 
+    (SELECT aluno_id FROM alunos WHERE matricula = 'MAT2026-021' LIMIT 1),
+    turma_disciplina_id,
+    9.00, 9.50, 8.00, 100.00
+FROM diarioclasse
+WHERE fk_turma = (SELECT fk_turma FROM alunos WHERE matricula = 'MAT2026-021' LIMIT 1);
+
+-- ====================================================================
+INSERT INTO boletins (fk_aluno, fk_turma_disciplina, nota_u1, nota_u2, nota_u3, frequencia)
+SELECT 
+    (SELECT aluno_id FROM alunos WHERE matricula = 'MAT2026-031' LIMIT 1),
+    turma_disciplina_id,
+    6.50, 7.00, 8.00, 85.00
+FROM diarioclasse
+WHERE fk_turma = (SELECT fk_turma FROM alunos WHERE matricula = 'MAT2026-031' LIMIT 1);
+
+-- ====================================================================
+INSERT INTO boletins (fk_aluno, fk_turma_disciplina, nota_u1, nota_u2, nota_u3, frequencia)
+SELECT 
+    (SELECT aluno_id FROM alunos WHERE matricula = 'MAT2026-041' LIMIT 1),
+    turma_disciplina_id,
+    10.00, 9.00, 9.50, 98.00
+FROM diarioclasse
+WHERE fk_turma = (SELECT fk_turma FROM alunos WHERE matricula = 'MAT2026-041' LIMIT 1);
+
+COMMIT;
+
+

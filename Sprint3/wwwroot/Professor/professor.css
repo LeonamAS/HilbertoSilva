@@ -10,22 +10,22 @@ body {
 }
 
 .navbar-custom {
-    background-color: var(--primary-green);
+    background-color: var(--primary-green) !important;
 }
 
 .card-custom {
-    border-radius: 15px;
+    border-radius: 10px;
     border: none;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .table-custom th {
-    background-color: var(--primary-green);
-    color: white;
+    background-color: #f8f9fa;
+    color: var(--dark-bg);
 }
 
+/* MEDIA QUERIES (Mobile) - Transformando a Tabela em Cards */
 @media (max-width: 992px) {
-    /* TABELA NO MOBILE (Em formato de Cards) */
     .table-responsive {
         overflow-x: visible;
     }
@@ -63,7 +63,7 @@ body {
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.8rem;
-            color: var(--primary-green, #54a790);
+            color: var(--primary-green);
             margin-right: 15px;
             text-align: left;
         }

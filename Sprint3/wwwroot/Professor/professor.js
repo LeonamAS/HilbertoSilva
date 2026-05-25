@@ -1,6 +1,8 @@
 ﻿const token = localStorage.getItem("token");
 const API_BASE_URL = 'https://localhost:7151';
 
+let turmasDisciplinasCache = [];
+
 if (!token) {
     alert("Acesso negado. Faça login primeiro.");
     window.location.href = "index.html";
@@ -8,40 +10,34 @@ if (!token) {
 
 document.getElementById('btnSair').addEventListener('click', () => {
     localStorage.removeItem("token");
-    window.location.href = "index.html";
+    window.location.href = API_BASE_URL;
 });
 
 let modalNotasInstance = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     modalNotasInstance = new bootstrap.Modal(document.getElementById('modalLancarNotas'));
 
-    // 1. AQUI VOCÊ DEVE CARREGAR AS TURMAS DO PROFESSOR (Exemplo estático abaixo)
-    // fetch(`${API_BASE_URL}/api/professor/turmas`, ... )
-    const selectTurma = document.getElementById('selectTurma');
-    selectTurma.innerHTML = `
-        <option value="">Selecione...</option>
-        <option value="1">1º Ano A</option>
-        <option value="2">2º Ano B</option>
-    `;
+    await carregarMinhasTurmas();
 
-    // 2. AQUI VOCÊ CARREGA AS DISCIPLINAS QUANDO A TURMA MUDA
-    selectTurma.addEventListener('change', (e) => {
+    document.getElementById('selectTurma').addEventListener('change', (e) => {
+        const turmaId = parseInt(e.target.value);
         const selectDisciplina = document.getElementById('selectDisciplina');
-        if (e.target.value) {
+
+        if (turmaId) {
             selectDisciplina.disabled = false;
-            selectDisciplina.innerHTML = `
-                <option value="">Selecione...</option>
-                <option value="101">Matemática</option>
-                <option value="102">Português</option>
-            `;
+            const disciplinasDaTurma = turmasDisciplinasCache.filter(td => td.turmaId === turmaId);
+
+            selectDisciplina.innerHTML = '<option value="">Selecione a disciplina...</option>';
+            disciplinasDaTurma.forEach(d => {
+                selectDisciplina.innerHTML += `<option value="${d.disciplinaId}">${d.nomeDisciplina}</option>`;
+            });
         } else {
             selectDisciplina.disabled = true;
             selectDisciplina.innerHTML = '<option value="">Selecione a disciplina...</option>';
         }
     });
 
-    // 3. BUSCAR ALUNOS DA TURMA E DISCIPLINA SELECIONADAS
     document.getElementById('btnBuscarAlunos').addEventListener('click', async () => {
         const turmaId = document.getElementById('selectTurma').value;
         const disciplinaId = document.getElementById('selectDisciplina').value;
@@ -55,76 +51,76 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-success spinner-border-sm"></div> Carregando...</td></tr>`;
 
         try {
-            // Substitua pela sua rota C# correta para buscar os alunos do diário
-            // const response = await fetch(`${API_BASE_URL}/api/diario/turma/${turmaId}/disciplina/${disciplinaId}`, { headers: ... });
+            const response = await fetch(`${API_BASE_URL}/api/DiarioClasse/turma/${turmaId}/disciplina/${disciplinaId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            // DADOS FALSOS PARA TESTE VISUAL (Apague quando conectar na API)
-            const mockAlunos = [
-                { idAluno: 1, matricula: "2024001", nome: "João Silva", notaU1: 7.5, notaU2: null, notaU3: null, frequencia: 85 },
-                { idAluno: 2, matricula: "2024002", nome: "Maria Oliveira", notaU1: 9.0, notaU2: 8.5, notaU3: null, frequencia: 95 }
-            ];
+            if (!response.ok) throw new Error("Falha ao buscar alunos.");
 
-            renderizarTabelaAlunos(mockAlunos);
+            const alunos = await response.json();
+            renderizarTabelaAlunos(alunos);
 
         } catch (error) {
             console.error(error);
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Erro ao carregar alunos.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Erro ao carregar alunos do servidor.</td></tr>`;
         }
     });
 
-    // 4. SALVAR NOTAS DO MODAL NO BANCO DE DADOS
     document.getElementById('formLancarNotas').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const btnSalvar = document.getElementById('btnSalvarNotas');
         const alertModal = document.getElementById('alertModal');
 
-        const idAluno = document.getElementById('modalIdAluno').value;
+        const alunoId = document.getElementById('modalIdAluno').value;
         const turmaId = document.getElementById('selectTurma').value;
         const disciplinaId = document.getElementById('selectDisciplina').value;
 
-        // Pega valores. Se vazio, envia nulo para não sobrescrever com zero incorretamente.
         const vU1 = document.getElementById('notaU1').value;
         const vU2 = document.getElementById('notaU2').value;
         const vU3 = document.getElementById('notaU3').value;
         const vFreq = document.getElementById('frequencia').value;
 
         const payload = {
-            idAluno: parseInt(idAluno),
-            idTurma: parseInt(turmaId),
-            idDisciplina: parseInt(disciplinaId),
-            notaU1: vU1 !== "" ? parseFloat(vU1) : null,
-            notaU2: vU2 !== "" ? parseFloat(vU2) : null,
-            notaU3: vU3 !== "" ? parseFloat(vU3) : null,
-            frequencia: vFreq !== "" ? parseInt(vFreq) : null
+            alunoId: parseInt(alunoId),
+            turmaId: parseInt(turmaId),
+            disciplinaId: parseInt(disciplinaId),
+            notaU1: vU1 !== "" ? parseFloat(vU1.replace(',', '.')) : null,
+            notaU2: vU2 !== "" ? parseFloat(vU2.replace(',', '.')) : null,
+            notaU3: vU3 !== "" ? parseFloat(vU3.replace(',', '.')) : null,
+            frequencia: vFreq !== "" ? parseFloat(vFreq.replace(',', '.')) : null
         };
 
         try {
             btnSalvar.disabled = true;
             btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
 
-            // CHAME SUA API AQUI (Exemplo de PUT ou POST)
-            /*
-            const response = await fetch(`${API_BASE_URL}/api/diario/lancar-notas`, {
+            const response = await fetch(`${API_BASE_URL}/api/DiarioClasse/lancar-notas`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(payload)
             });
-            */
 
-            // Simulação de sucesso
-            await new Promise(r => setTimeout(r, 1000)); // Simula tempo de rede
+            if (!response.ok) throw new Error("Erro da API ao salvar.");
 
             mostrarAlerta(alertModal, "Notas salvas com sucesso!", "success");
 
             setTimeout(() => {
                 modalNotasInstance.hide();
                 alertModal.classList.add('d-none');
-                document.getElementById('btnBuscarAlunos').click(); // Recarrega a tabela
+                document.getElementById('btnBuscarAlunos').click();
             }, 1500);
 
         } catch (error) {
-            mostrarAlerta(alertModal, "Erro ao salvar as notas.", "danger");
+            console.error(error);
+            mostrarAlerta(alertModal, "Erro ao salvar as notas. Verifique os dados e tente novamente.", "danger");
         } finally {
             btnSalvar.disabled = false;
             btnSalvar.innerText = "Salvar Lançamento";
@@ -132,32 +128,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ================= FUNÇÕES AUXILIARES =================
+async function carregarMinhasTurmas() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/DiarioClasse/minhas-turmas`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error("Erro ao buscar turmas.");
+
+        turmasDisciplinasCache = await response.json();
+
+        const mapTurmasUnicas = new Map();
+        const turmasUnicas = [];
+
+        for (const item of turmasDisciplinasCache) {
+            if (!mapTurmasUnicas.has(item.turmaId)) {
+                mapTurmasUnicas.set(item.turmaId, true);
+                turmasUnicas.push({ id: item.turmaId, nome: item.nomeTurma });
+            }
+        }
+
+        const selectTurma = document.getElementById('selectTurma');
+        selectTurma.innerHTML = '<option value="">Selecione a turma...</option>';
+
+        turmasUnicas.forEach(t => {
+            selectTurma.innerHTML += `<option value="${t.id}">${t.nome}</option>`;
+        });
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro de comunicação com o servidor ao carregar suas turmas.");
+    }
+}
 
 function renderizarTabelaAlunos(alunos) {
     const tbody = document.getElementById('corpoTabelaAlunos');
     tbody.innerHTML = '';
 
     if (alunos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Nenhum aluno encontrado nesta turma.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Nenhum aluno encontrado nesta turma.</td></tr>`;
         return;
     }
 
     alunos.forEach(aluno => {
-        const formatarNota = (n) => n === null || n === undefined ? '<span class="text-muted">-</span>' : Number(n).toFixed(1);
-        const formatarFreq = (f) => f === null || f === undefined ? '<span class="text-muted">-</span>' : `${f}%`;
+        const corU1 = (aluno.notaU1 !== null && Number(aluno.notaU1) < 6) ? 'text-danger fw-bold' : '';
+        const corU2 = (aluno.notaU2 !== null && Number(aluno.notaU2) < 6) ? 'text-danger fw-bold' : '';
+        const corU3 = (aluno.notaU3 !== null && Number(aluno.notaU3) < 6) ? 'text-danger fw-bold' : '';
+        const corFreq = (aluno.frequencia !== null && Number(aluno.frequencia) < 70) ? 'text-danger fw-bold' : '';
 
-        // Guardamos os dados do aluno no atributo data do botão para preencher o modal depois
+        const formatarNota = (n, cor) => n === null || n === undefined ? '<span class="text-muted">-</span>' : `<span class="${cor}">${Number(n).toFixed(1)}</span>`;
+        const formatarFreq = (f, cor) => f === null || f === undefined ? '<span class="text-muted">-</span>' : `<span class="${cor}">${Number(f).toFixed(0)}%</span>`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${aluno.matricula}</td>
-            <td class="fw-medium">${aluno.nome}</td>
-            <td class="text-center">${formatarNota(aluno.notaU1)}</td>
-            <td class="text-center">${formatarNota(aluno.notaU2)}</td>
-            <td class="text-center">${formatarNota(aluno.notaU3)}</td>
-            <td class="text-center">${formatarFreq(aluno.frequencia)}</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-outline-primary" onclick="abrirModalNotas(${aluno.idAluno}, '${aluno.nome}', ${aluno.notaU1}, ${aluno.notaU2}, ${aluno.notaU3}, ${aluno.frequencia})">
+            <td data-label="Matrícula">${aluno.matricula}</td>
+            <td data-label="Nome do Aluno" class="fw-medium">${aluno.nomeAluno}</td>
+            <td data-label="Unidade 1" class="text-center">${formatarNota(aluno.notaU1, corU1)}</td>
+            <td data-label="Unidade 2" class="text-center">${formatarNota(aluno.notaU2, corU2)}</td>
+            <td data-label="Unidade 3" class="text-center">${formatarNota(aluno.notaU3, corU3)}</td>
+            <td data-label="Frequência (%)" class="text-center">${formatarFreq(aluno.frequencia, corFreq)}</td>
+            <td data-label="Ações" class="text-center">
+                <button class="btn btn-sm btn-outline-primary" onclick="abrirModalNotas(${aluno.alunoId}, '${aluno.nomeAluno}', ${aluno.notaU1}, ${aluno.notaU2}, ${aluno.notaU3}, ${aluno.frequencia})">
                     <i class="fas fa-edit"></i> Lançar
                 </button>
             </td>
@@ -166,11 +198,9 @@ function renderizarTabelaAlunos(alunos) {
     });
 }
 
-// Função chamada pelo botão "Lançar" na tabela
-window.abrirModalNotas = function (idAluno, nome, notaU1, notaU2, notaU3, frequencia) {
-    // Preenche os campos do modal com os dados atuais do aluno
-    document.getElementById('modalIdAluno').value = idAluno;
-    document.getElementById('modalNomeAluno').textContent = nome;
+window.abrirModalNotas = function (alunoId, nomeAluno, notaU1, notaU2, notaU3, frequencia) {
+    document.getElementById('modalIdAluno').value = alunoId;
+    document.getElementById('modalNomeAluno').textContent = nomeAluno;
 
     document.getElementById('notaU1').value = notaU1 !== null ? notaU1 : "";
     document.getElementById('notaU2').value = notaU2 !== null ? notaU2 : "";
@@ -178,8 +208,6 @@ window.abrirModalNotas = function (idAluno, nome, notaU1, notaU2, notaU3, freque
     document.getElementById('frequencia').value = frequencia !== null ? frequencia : "";
 
     document.getElementById('alertModal').classList.add('d-none');
-
-    // Abre o modal
     modalNotasInstance.show();
 };
 
@@ -188,3 +216,77 @@ function mostrarAlerta(elemento, mensagem, tipo) {
     elemento.textContent = mensagem;
     elemento.classList.remove('d-none');
 }
+
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+});
+
+function validarSenhaForte(senha) {
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    return regex.test(senha);
+}
+
+function limparErrosSenha() {
+    document.querySelectorAll('#formAlterarSenha .text-danger.small').forEach(el => {
+        el.classList.add('d-none');
+        el.textContent = '';
+    });
+    document.querySelectorAll('#formAlterarSenha .is-invalid').forEach(el => {
+        el.classList.remove('is-invalid');
+    });
+}
+
+function mostrarErroSenha(inputId, erroId, mensagem) {
+    const input = document.getElementById(inputId);
+    const erroEl = document.getElementById(erroId);
+
+    if (input) input.classList.add('is-invalid');
+    if (erroEl) {
+        erroEl.textContent = mensagem;
+        erroEl.classList.remove('d-none');
+    }
+}
+
+document.getElementById('formAlterarSenha').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    limparErrosSenha();
+
+    const senhaAtual = document.getElementById('senhaAtual').value;
+    const novaSenha = document.getElementById('novaSenha').value;
+    const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+    let formValido = true;
+
+    if (!senhaAtual) {
+        mostrarErroSenha('senhaAtual', 'erroSenhaAtual', 'A senha atual é obrigatória.');
+        formValido = false;
+    }
+
+    if (!validarSenhaForte(novaSenha)) {
+        mostrarErroSenha('novaSenha', 'erroNovaSenha', 'A nova senha não atende aos requisitos mínimos.');
+        formValido = false;
+    }
+
+    if (novaSenha !== confirmarSenha) {
+        mostrarErroSenha('confirmarSenha', 'erroConfirmarSenha', 'As senhas digitadas não coincidem.');
+        formValido = false;
+    }
+
+    if (!formValido) return;
+
+    console.log("Formulário validado com sucesso! Pronto para chamar a API.");
+});

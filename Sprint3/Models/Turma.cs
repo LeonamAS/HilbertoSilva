@@ -17,7 +17,7 @@ public class Turma
 
     [Required(ErrorMessage = "O ano escolar é obrigatório.")]
     [Column("ano_escolar")]
-    public string AnoEscolar { get; set; }
+    public AnoEscolar AnoEscolar { get; set; }
 
     [Required(ErrorMessage = "O ano letivo é obrigatório.")]
     [Column("ano_letivo")]

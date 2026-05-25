@@ -1,4 +1,6 @@
-﻿namespace HilbertoSilva.DTOs.Response;
+﻿using HilbertoSilva.Models.Enum;
+
+namespace HilbertoSilva.DTOs.Response;
 
 public class BoletimResponseDto
 {
@@ -18,6 +20,6 @@ public class BoletimResponseDto
     public decimal MediaFinal { get; set; }
 
     //Para a impressão do boletim
-    public string AnoEscolar { get; set; }
+    public AnoEscolar AnoEscolar { get; set; }
     public int AnoLetivo { get; set; }
 }

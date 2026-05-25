@@ -276,7 +276,7 @@ function mostrarErro(inputId, erroId, mensagem) {
 
     if (input) input.classList.add('is-invalid');
     if (erroEl) {
-        erroEl.textContent = mensaje;
+        erroEl.textContent = mensagem;
         erroEl.classList.remove('d-none');
     }
 }
