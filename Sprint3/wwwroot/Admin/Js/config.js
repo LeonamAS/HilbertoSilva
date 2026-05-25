@@ -132,10 +132,10 @@ export const config = {
         formFields: [
             { name: 'alunoNomeDisplay', label: 'Aluno', type: 'text', disabled: true, onlyCreate: true },
             { name: 'turmaDisciplinaId', label: 'Disciplina', type: 'select', required: true, options: [], onlyCreate: true },
-            { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', required: true, step: '0.1' },
-            { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', required: true, step: '0.1' },
-            { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', required: true, step: '0.1' },
-            { name: 'frequencia', label: 'Percentual de Frequência (0 a 100)', type: 'number', required: true }
+            { name: 'notaU1', label: 'Nota - Unidade 1', type: 'number', step: '0.1' },
+            { name: 'notaU2', label: 'Nota - Unidade 2', type: 'number', step: '0.1' },
+            { name: 'notaU3', label: 'Nota - Unidade 3', type: 'number', step: '0.1' },
+            { name: 'frequencia', label: 'Percentual de Frequência (0 a 100)', type: 'number' }
         ],
         buildPayload: (data, id) => {
             if (!id) {

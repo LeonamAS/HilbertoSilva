@@ -96,6 +96,23 @@ body {
         background-color: #bb2d3b !important;
     }
 
+/* Customização da Barra de Pesquisa */
+#searchInput:focus {
+    box-shadow: none;
+    outline: none;
+    background-color: #fafbfc;
+}
+
+#searchContainer .input-group {
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+    #searchContainer .input-group:focus-within {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 0.25rem rgba(84, 167, 144, 0.25) !important;
+    }
+
 /* RESPONSIVIDADE (Tablets e Celulares)*/
 @media (max-width: 992px) {
     .main-content {

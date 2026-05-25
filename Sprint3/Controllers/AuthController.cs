@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace HilbertoSilva.Controllers;
 
+/// <summary>
+/// Gerencia a autenticação e registro de usuários no sistema.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -21,6 +24,13 @@ public class AuthController : ControllerBase
         _tokenService = tokenService;
     }
 
+    /// <summary>
+    /// Realiza o login de um usuário e retorna um Token JWT.
+    /// </summary>
+    /// <param name="loginDto">Objeto contendo CPF e senha do usuário.</param>
+    /// <returns>Retorna um Token JWT em caso de sucesso.</returns>
+    /// <response code="200">Login realizado com sucesso.</response>
+    /// <response code="401">CPF ou senha inválidos.</response>
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -37,6 +47,12 @@ public class AuthController : ControllerBase
         return Ok(new { token });
     }
 
+    /// <summary>
+    /// Registra um novo usuário no sistema. (Restrito a administradores).
+    /// </summary>
+    /// <param name="createUsuarioDto">Objeto com os dados de criação do usuário.</param>
+    /// <response code="201">Usuário criado com sucesso.</response>
+    /// <response code="400">Erros de validação na requisição.</response>
     [HttpPost("registrar")]
     [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -47,6 +63,13 @@ public class AuthController : ControllerBase
         return StatusCode(StatusCodes.Status201Created, usuarioCriado);
     }
 
+    /// <summary>
+    /// Altera a senha do usuário autenticado.
+    /// </summary>
+    /// <param name="alterarSenhaDto">Objeto contendo a senha atual e a nova senha desejada.</param>
+    /// <response code="204">Senha alterada com sucesso. (Não retorna conteúdo)</response>
+    /// <response code="400">Não foi possível alterar a senha (ex: a senha atual informada está incorreta).</response>
+    /// <response code="401">Usuário não autenticado, sessão inválida ou token corrompido.</response>
     [HttpPut("alterar-senha")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -54,7 +77,6 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AlterarSenha([FromBody] UsuarioAlterarSenhaDto alterarSenhaDto)
     {
-        // Extrai o ID do usuário diretamente do Token JWT
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!int.TryParse(userIdClaim, out int usuarioId))

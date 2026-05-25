@@ -6,6 +6,15 @@ import { buildForm, carregarDropdownsDinamicos } from './form.js';
 
 export async function loadData() {
     const conf = config[state.currentEntity];
+    const searchContainer = document.getElementById('searchContainer');
+    const searchInput = document.getElementById('searchInput');
+
+    if (state.currentEntity === 'alunos') {
+        searchContainer.style.display = 'flex';
+    } else {
+        searchContainer.style.display = 'none';
+        if (searchInput) searchInput.value = '';
+    }
 
     const oldBackBtnAluno = document.getElementById('btnVoltarAlunos');
     if (oldBackBtnAluno) oldBackBtnAluno.remove();
@@ -155,6 +164,26 @@ export function setupTableEvents() {
             state.itemToDeleteId = null;
         }
     });
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const linhas = state.el.tableBody.querySelectorAll('tr');
+
+            linhas.forEach(linha => {
+                if (linha.cells.length === 1) return;
+
+                const textoLinha = linha.textContent.toLowerCase();
+
+                if (textoLinha.includes(termo)) {
+                    linha.style.display = '';
+                } else {
+                    linha.style.display = 'none';
+                }
+            });
+        });
+    }
 }
 
 function imprimirBoletim() {

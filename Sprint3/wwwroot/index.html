@@ -123,7 +123,17 @@
                 border: none;
                 padding: 10px;
                 outline: none;
-                width: 100%;
+                flex: 1;
+            }
+
+        .toggle-password {
+            margin-right: 0 !important;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+            .toggle-password:hover {
+                color: var(--primary-green);
             }
 
         .btn-signup {
@@ -165,6 +175,7 @@
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="inputSenha" placeholder="Password">
+                        <i class="fas fa-eye toggle-password" id="btnToggleSenha"></i>
                     </div>
 
                     <div id="alertBox" class="alert alert-danger d-none mt-3 p-2 small"></div>

@@ -28,6 +28,7 @@ namespace HilbertoSilva.Services
                     NotaU1 = b.NotaU1,
                     NotaU2 = b.NotaU2,
                     NotaU3 = b.NotaU3,
+                    MediaFinal = ((b.NotaU1 ?? 0) + (b.NotaU2 ?? 0) + (b.NotaU3 ?? 0)) / 3,
                     Frequencia = b.Frequencia,
                     NomeAluno = b.Aluno.Nome,
                     NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
@@ -51,6 +52,7 @@ namespace HilbertoSilva.Services
                     NotaU1 = b.NotaU1,
                     NotaU2 = b.NotaU2,
                     NotaU3 = b.NotaU3,
+                    MediaFinal = ((b.NotaU1 ?? 0) + (b.NotaU2 ?? 0) + (b.NotaU3 ?? 0)) / 3,
                     Frequencia = b.Frequencia,
                     NomeAluno = b.Aluno.Nome,
                     NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
@@ -60,6 +62,30 @@ namespace HilbertoSilva.Services
                     AnoLetivo = b.DiarioClasse.Turma.AnoLetivo
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<BoletimResponseDto>> ObterPorUsuarioIdAsync(int usuarioId)
+        {
+            return await _context.Boletins
+                .AsNoTracking()
+                .Where(b => b.Aluno.FkUsuario == usuarioId)
+                .Select(b => new BoletimResponseDto
+                {
+                    Id = b.Id,
+                    AlunoId = b.FkAluno,
+                    NotaU1 = b.NotaU1,
+                    NotaU2 = b.NotaU2,
+                    NotaU3 = b.NotaU3,
+                    MediaFinal = ((b.NotaU1 ?? 0) + (b.NotaU2 ?? 0) + (b.NotaU3 ?? 0)) / 3,
+                    Frequencia = b.Frequencia,
+                    NomeAluno = b.Aluno.Nome,
+                    NomeDisciplina = b.DiarioClasse.Disciplina.Nome,
+                    Matricula = b.Aluno.Matricula,
+                    NomeTurma = b.Aluno.Turma != null ? b.Aluno.Turma.NomeTurma : "Sem Turma",
+                    AnoEscolar = b.DiarioClasse.Turma.AnoEscolar,
+                    AnoLetivo = b.DiarioClasse.Turma.AnoLetivo
+                })
+                .ToListAsync();
         }
 
         public async Task<BoletimResponseDto> CriarAsync(CreateBoletimDto request)
@@ -77,7 +103,7 @@ namespace HilbertoSilva.Services
             _context.Boletins.Add(boletim);
             await _context.SaveChangesAsync();
 
-            return await ObterPorIdAsync(boletim.Id);
+            return await ObterPorIdAsync(boletim.Id) ?? throw new Exception("Erro ao recuperar o boletim recém-criado.");
         }
 
         public async Task<bool> AtualizarAsync(int id, UpdateBoletimDto request)

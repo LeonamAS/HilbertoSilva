@@ -7,4 +7,5 @@ namespace HilbertoSilva.Services.Interfaces;
 
 public interface IBoletimService : IBaseService<CreateBoletimDto, UpdateBoletimDto, BoletimResponseDto>
 {
+    Task<IEnumerable<BoletimResponseDto>> ObterPorUsuarioIdAsync(int usuarioId);
 }

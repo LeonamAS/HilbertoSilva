@@ -24,14 +24,14 @@ public class Boletim
     public DiarioClasse DiarioClasse { get; set; }
 
     [Column("nota_u1")]
-    public decimal NotaU1 { get; set; } = 0.0m;
+    public decimal? NotaU1 { get; set; }
 
     [Column("nota_u2")]
-    public decimal NotaU2 { get; set; } = 0.0m;
+    public decimal? NotaU2 { get; set; }
 
     [Column("nota_u3")]
-    public decimal NotaU3 { get; set; } = 0.0m;
+    public decimal? NotaU3 { get; set; }
 
     [Column("frequencia")]
-    public decimal Frequencia { get; set; } = 100.00m;
+    public decimal? Frequencia { get; set; }
 }
