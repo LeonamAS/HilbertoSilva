@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using HilbertoSilva.DTOs.Request.Create;
+﻿using HilbertoSilva.DTOs.Request.Create;
 using HilbertoSilva.DTOs.Request.Update;
 using HilbertoSilva.DTOs.Response;
 using HilbertoSilva.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HilbertoSilva.Controllers;
 
@@ -12,7 +13,7 @@ namespace HilbertoSilva.Controllers;
 /// </summary>
 [Authorize]
 [Route("api/[controller]")]
-[Authorize(Roles = "ADMIN")]
+[Authorize]
 public class DiarioClasseController : ControllerBase
 {
     private readonly IDiarioClasseService _diarioService;
@@ -23,11 +24,65 @@ public class DiarioClasseController : ControllerBase
     }
 
     /// <summary>
+    /// Obtém as turmas e disciplinas vinculadas ao professor autenticado.
+    /// </summary>
+    /// <response code="200">Lista de turmas retornada com sucesso.</response>
+    /// <response code="401">Sessão inválida.</response>
+    [HttpGet("minhas-turmas")]
+    [Authorize(Roles = "PROFESSOR")]
+    public async Task<IActionResult> ObterMinhasTurmas()
+    {
+        // Pega o ID do Usuário direto do Token JWT (Igual ao seu "meu-boletim")
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out int usuarioId))
+            return Unauthorized(new { mensagem = "Sessão inválida." });
+
+        // O Service deve buscar apenas as turmas que esse ID de usuário (Professor) leciona
+        var turmas = await _diarioService.ObterTurmasPorProfessorUsuarioIdAsync(usuarioId);
+        return Ok(turmas);
+    }
+
+    /// <summary>
+    /// Obtém os alunos e suas respectivas notas filtrados por Turma e Disciplina para o Diário.
+    /// </summary>
+    [HttpGet("turma/{turmaId}/disciplina/{disciplinaId}")]
+    [Authorize(Roles = "PROFESSOR,ADMIN")]
+    public async Task<IActionResult> ObterAlunosDiario(int turmaId, int disciplinaId)
+    {
+        var alunosDiario = await _diarioService.ObterAlunosPorTurmaEDisciplinaAsync(turmaId, disciplinaId);
+        return Ok(alunosDiario);
+    }
+
+    /// <summary>
+    /// Lança ou atualiza as notas e a frequência de um aluno específico no diário.
+    /// </summary>
+    [HttpPut("lancar-notas")]
+    [Authorize(Roles = "PROFESSOR,ADMIN")]
+    public async Task<IActionResult> LancarNotas([FromBody] LancarNotasDto request) // <-- Mudamos aqui!
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var atualizado = await _diarioService.LancarNotasAsync(request);
+
+        if (!atualizado)
+        {
+            return NotFound(new { mensagem = "Registro de diário não encontrado para os parâmetros informados." });
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
     /// Obtém a lista de todos os diários de classe cadastrados no sistema.
     /// </summary>
     /// <returns>Retorna a lista de diários de classe.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
     [HttpGet]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DiarioClasseResponseDto>>> ObterTodos()
     {
@@ -43,6 +98,7 @@ public class DiarioClasseController : ControllerBase
     /// <response code="200">Diário de classe encontrado e retornado com sucesso.</response>
     /// <response code="404">Nenhum diário de classe encontrado com o ID fornecido.</response>
     [HttpGet("{id}")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DiarioClasseResponseDto>> ObterPorId(int id)
@@ -65,6 +121,7 @@ public class DiarioClasseController : ControllerBase
     /// <response code="201">Diário de classe criado com sucesso.</response>
     /// <response code="400">Dados inválidos fornecidos na requisição.</response>
     [HttpPost]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DiarioClasseResponseDto>> Criar([FromBody] CreateDiarioClasseDto request)
@@ -88,6 +145,7 @@ public class DiarioClasseController : ControllerBase
     /// <response code="400">Dados inválidos fornecidos na requisição.</response>
     /// <response code="404">Nenhum diário de classe encontrado com o ID fornecido.</response>
     [HttpPut("{id}")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -115,6 +173,7 @@ public class DiarioClasseController : ControllerBase
     /// <response code="204">Diário de classe excluído com sucesso.</response>
     /// <response code="404">Nenhum diário de classe encontrado com o ID fornecido.</response>
     [HttpDelete("{id}")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Deletar(int id)

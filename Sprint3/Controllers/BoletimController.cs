@@ -53,6 +53,7 @@ public class BoletimController : ControllerBase
     /// <returns>Retorna a lista de boletins.</returns>
     /// <response code="200">Lista retornada com sucesso.</response>
     [HttpGet]
+    [Authorize(Roles = "ADMIN,PROFESSOR")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<BoletimResponseDto>>> ObterTodos()
     {
@@ -68,6 +69,7 @@ public class BoletimController : ControllerBase
     /// <response code="200">Boletim encontrado e retornado com sucesso.</response>
     /// <response code="404">Nenhum boletim encontrado com o ID fornecido.</response>
     [HttpGet("{id}")]
+    [Authorize(Roles = "ADMIN,PROFESSOR")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BoletimResponseDto>> ObterPorId(int id)
@@ -90,6 +92,7 @@ public class BoletimController : ControllerBase
     /// <response code="201">Boletim criado com sucesso.</response>
     /// <response code="400">Dados inválidos fornecidos na requisição.</response>
     [HttpPost]
+    [Authorize(Roles = "ADMIN,PROFESSOR")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<BoletimResponseDto>> Criar([FromBody] CreateBoletimDto request)
@@ -113,6 +116,7 @@ public class BoletimController : ControllerBase
     /// <response code="400">Dados inválidos fornecidos na requisição.</response>
     /// <response code="404">Nenhum boletim encontrado com o ID fornecido.</response>
     [HttpPut("{id}")]
+    [Authorize(Roles = "ADMIN,PROFESSOR")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -140,6 +144,7 @@ public class BoletimController : ControllerBase
     /// <response code="204">Boletim excluído com sucesso.</response>
     /// <response code="404">Nenhum boletim encontrado com o ID fornecido.</response>
     [HttpDelete("{id}")]
+    [Authorize(Roles = "ADMIN,PROFESSOR")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Deletar(int id)

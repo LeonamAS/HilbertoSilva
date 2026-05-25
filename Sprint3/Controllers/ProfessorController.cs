@@ -12,7 +12,7 @@ namespace HilbertoSilva.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "ADMIN")]
 public class ProfessorController : ControllerBase
 {
     private readonly IProfessorService _professorService;

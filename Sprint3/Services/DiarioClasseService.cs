@@ -92,5 +92,84 @@ namespace HilbertoSilva.Services
 
             return true;
         }
+        public async Task<IEnumerable<TurmaDisciplinaResponseDto>> ObterTurmasPorProfessorUsuarioIdAsync(int usuarioId)
+        {
+            return await _context.DiarioClasse
+                .AsNoTracking()
+                .Where(d => d.Professor.FkUsuario == usuarioId)
+                .Select(d => new TurmaDisciplinaResponseDto
+                {
+                    TurmaId = d.FkTurma,
+                    NomeTurma = d.Turma.AnoEscolar + " - " + d.Turma.NomeTurma,
+                    DisciplinaId = d.FkDisciplina,
+                    NomeDisciplina = d.Disciplina.Nome
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<AlunosDiarioResponseDto>> ObterAlunosPorTurmaEDisciplinaAsync(int turmaId, int disciplinaId)
+        {
+            var diario = await _context.DiarioClasse
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.FkTurma == turmaId && d.FkDisciplina == disciplinaId);
+
+            if (diario == null)
+                return Enumerable.Empty<AlunosDiarioResponseDto>();
+
+            return await _context.Alunos
+                .AsNoTracking()
+                .Where(a => a.FkTurma == turmaId)
+                .Select(a => new AlunosDiarioResponseDto
+                {
+                    AlunoId = a.Id,
+                    Matricula = a.Matricula,
+                    NomeAluno = a.Nome,
+                    NotaU1 = _context.Boletins.Where(b => b.FkAluno == a.Id && b.FkTurmaDisciplina == diario.Id).Select(b => b.NotaU1).FirstOrDefault(),
+                    NotaU2 = _context.Boletins.Where(b => b.FkAluno == a.Id && b.FkTurmaDisciplina == diario.Id).Select(b => b.NotaU2).FirstOrDefault(),
+                    NotaU3 = _context.Boletins.Where(b => b.FkAluno == a.Id && b.FkTurmaDisciplina == diario.Id).Select(b => b.NotaU3).FirstOrDefault(),
+                    Frequencia = _context.Boletins.Where(b => b.FkAluno == a.Id && b.FkTurmaDisciplina == diario.Id).Select(b => b.Frequencia).FirstOrDefault()
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> LancarNotasAsync(LancarNotasDto request)
+        {
+            var alunoValido = await _context.Alunos.AnyAsync(a => a.Id == request.AlunoId && a.FkTurma == request.TurmaId);
+            if (!alunoValido) return false;
+
+            var diario = await _context.DiarioClasse
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.FkTurma == request.TurmaId && d.FkDisciplina == request.DisciplinaId);
+
+            if (diario == null) return false;
+
+            var boletim = await _context.Boletins
+                .FirstOrDefaultAsync(b => b.FkAluno == request.AlunoId && b.FkTurmaDisciplina == diario.Id);
+
+            if (boletim == null)
+            {
+                boletim = new Boletim
+                {
+                    FkAluno = request.AlunoId,
+                    FkTurmaDisciplina = diario.Id,
+                    NotaU1 = request.NotaU1,
+                    NotaU2 = request.NotaU2,
+                    NotaU3 = request.NotaU3,
+                    Frequencia = request.Frequencia
+                };
+                _context.Boletins.Add(boletim);
+            }
+            else
+            {
+                boletim.NotaU1 = request.NotaU1;
+                boletim.NotaU2 = request.NotaU2;
+                boletim.NotaU3 = request.NotaU3;
+                boletim.Frequencia = request.Frequencia;
+                _context.Boletins.Update(boletim);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
