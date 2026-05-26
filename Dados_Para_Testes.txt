@@ -15,7 +15,7 @@ INSERT INTO disciplinas (nome, carga_horaria) VALUES
 ('Artes', 70),
 ('Ensino Religioso', 30),
 ('Língua Estrangeira', 70),
-('Optativa', 30);
+('Educação Digital', 30);
 
 -- TURMAS
 INSERT INTO turmas (nome_turma, ano_escolar, ano_letivo, turno) VALUES
@@ -113,10 +113,10 @@ VALUES (@id_estrangeira, 'Igor Rocha', '71988880009', 'Língua Estrangeira');
 INSERT INTO usuarios (cpf, senha, tipo_usuario, data_cadastro) 
 VALUES ('10101010101', 'Professor@123', 'PROFESSOR', NOW(6));
 
-SET @id_optativa = LAST_INSERT_ID();
+SET @id_digital = LAST_INSERT_ID();
 
 INSERT INTO professores (fk_usuario, nome, telefone, especialidade) 
-VALUES (@id_optativa, 'Juliana Martins', '71988880010', 'Optativa');
+VALUES (@id_digital, 'Juliana Martins', '71988880010', 'Educação Digital');
 
 -- Confirmando todas as inserções no banco
 COMMIT;
