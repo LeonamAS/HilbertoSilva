@@ -24,6 +24,7 @@ Para rodar o projeto localmente, siga os passos abaixo:
 **1.** Abra o appsettings.json e configure a string de conexão no `appsettings.json` para acessar o banco de dados local. 
 Deve ficar assim:
 “Server=localhost;Database=em_hilberto_silva;Uid=root;Pwd={SUA_SENHA_AQUI};”.
+
 **2.** Abra o Console do Gerenciador de Pacotes e execute o `Update-Database`.
 
 **3.** Execute o projeto (F5).
@@ -50,3 +51,25 @@ Abaixo estão os principais endpoints disponíveis no sistema:
 - GET: /api/DiarioClasse/minhas-turmas - Obtém as turmas e disciplinas vinculadas ao professor autenticado.
 - GET: /api/DiarioClasse/turma/{turmaId}/disciplina/{disciplinaId} - Obtém os alunos e suas respectivas notas filtrados por Turma e Disciplina para o Diário.
 - PUT: /api/DiarioClasse/lancar-notas - Lança ou atualiza as notas e a frequência de um aluno específico no diário.
+
+# Documentação Funcional
+
+## Objetivo do Sistema
+
+- Possibilitar à secretaria fazer todo o gerenciamento escolar, manipulando com facilidade as entidades escolares e ao mesmo tempo tornando flexível as relações entre as mesmas.
+- Facilitar para os professores atribuírem notas e frequências para seus alunos.
+- Permitir  aos alunos a visualização de seus boletins de forma fácil e simplificada.
+
+## Regras de Negócio
+
+- RF001 - O sistema utiliza o CPF e uma senha para autenticação. Quando criamos um novo aluno/professor é atribuído o seu respectivo Role, que os permite acessar a sua  tela dedicada no sistema.
+- RF002 - Um aluno só pode estar matriculado em uma única turma, que é o comportamento natural em escolas. O sistema exige que o cadastro do aluno contenha obrigatoriamente os dados do seu responsável legal, destacando  a importância do acompanhamento escolar e de estar preparado para qualquer acidente/incidente.
+- RF003 - O aluno só pode visualizar o seu próprio boletim, e o professor só pode atribuir as  notas/frequência para as  turmas e matérias que leciona.
+- RF004 - Fluxo adequado de inserção de dados: Criar disciplinas, criar turma, criar  diário de classe, criar professor, criar aluno.
+
+## Funcionalidades Principais
+
+- Criação de diários de classe detalhados e flexíveis.
+- Simplificação no processo de montar o boletim escolar do aluno.
+- Agilidade em gerenciar todos os dados presentes no sistema.
+
